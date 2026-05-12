@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const BarcodeScanner = dynamic(() => import("./BarcodeScanner"), { ssr: false });
 
 interface Props {
   initialValue?: string;
@@ -13,6 +16,7 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
   const [query, setQuery] = useState(initialValue);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -59,16 +63,19 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
 
   const inputClass =
     size === "lg"
-      ? "w-full pl-11 pr-28 py-3.5 text-base rounded-xl border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
-      : "w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition";
+      ? "w-full pl-11 pr-[9.5rem] py-3.5 text-base rounded-xl border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition"
+      : "w-full pl-9 pr-10 py-2 text-sm rounded-lg border border-[var(--color-border)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition";
 
   return (
+    <>
     <div ref={ref} className="relative w-full">
       <form onSubmit={handleSubmit}>
         <div className="relative">
+          {/* Search icon */}
           <svg className={`absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)] ${size === "lg" ? "w-5 h-5" : "w-4 h-4"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
           </svg>
+
           <input
             type="search"
             value={query}
@@ -80,11 +87,29 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
             autoComplete="off"
             aria-label="Search medicines"
           />
-          {size === "lg" && (
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-              Search
+
+          {/* Right-side buttons */}
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+            {/* Camera / barcode scan button */}
+            <button
+              type="button"
+              onClick={() => setScannerOpen(true)}
+              aria-label="Scan barcode"
+              title="Scan product barcode"
+              className={`flex items-center justify-center rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-brand)] hover:border-[var(--color-brand)] transition-colors bg-[var(--color-surface)] ${size === "lg" ? "w-9 h-9" : "w-7 h-7"}`}
+            >
+              <svg className={size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4v-4M16 4h4m0 0v4m0-4L12 12" />
+              </svg>
             </button>
-          )}
+
+            {/* Search submit button — lg only */}
+            {size === "lg" && (
+              <button type="submit" className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                Search
+              </button>
+            )}
+          </div>
         </div>
       </form>
 
@@ -103,5 +128,9 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
         </ul>
       )}
     </div>
+
+    {/* Barcode scanner modal — lazy loaded */}
+    {scannerOpen && <BarcodeScanner onClose={() => setScannerOpen(false)} />}
+    </>
   );
 }

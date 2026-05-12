@@ -39,3 +39,9 @@ body {
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Barcode scanner sweep line */
+@keyframes scan {
+  0%, 100% { top: 4px; }
+  50%       { top: calc(100% - 4px); }
+}
