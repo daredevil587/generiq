@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import BottomNav from "@/components/BottomNav";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,15 +42,24 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1 pb-16 sm:pb-0">{children}</main>
         <footer className="hidden sm:block border-t border-[var(--color-border)] bg-[var(--color-surface)] mt-auto">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-muted)]">
-            <p>
-              © {new Date().getFullYear()} GeneriQ. Data sourced from{" "}
-              <a href="https://products.mhra.gov.uk" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-brand)] underline underline-offset-2">
-                MHRA
-              </a>{" "}
-              &amp; NHS Drug Tariff.
-            </p>
-            <p>Not medical advice. Always consult your pharmacist or GP.</p>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 text-xs text-[var(--color-muted)]">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
+              <p>
+                © {new Date().getFullYear()} GeneriQ. Data sourced from{" "}
+                <a href="https://products.mhra.gov.uk" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-brand)] underline underline-offset-2">
+                  MHRA
+                </a>{" "}
+                &amp; NHS Drug Tariff.
+              </p>
+              <p>Not medical advice. Always consult your pharmacist or GP.</p>
+            </div>
+            <div className="flex items-center justify-center sm:justify-start gap-4 pt-3 border-t border-[var(--color-border)]">
+              <Link href="/privacy" className="hover:text-[var(--color-brand)] transition-colors">Privacy Policy</Link>
+              <span>·</span>
+              <Link href="/terms" className="hover:text-[var(--color-brand)] transition-colors">Terms of Service</Link>
+              <span>·</span>
+              <a href="mailto:yadavuttam5788@gmail.com" className="hover:text-[var(--color-brand)] transition-colors">Contact</a>
+            </div>
           </div>
         </footer>
         <BottomNav />
