@@ -234,7 +234,7 @@ export default async function MedicinePage({ params }: Props) {
           </svg>
           Price Comparison
         </h2>
-        <PriceTable prices={prices} />
+        <PriceTable prices={prices} medicineName={medicine.name} />
       </div>
 
       {/* Disclaimer */}

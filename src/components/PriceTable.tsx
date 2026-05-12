@@ -10,6 +10,7 @@ const PPC_3MONTH  = 30.25;
 
 interface Props {
   prices: PriceRow[];
+  medicineName?: string;
 }
 
 const PHARMACY_COLORS: Record<string, string> = {
@@ -26,7 +27,7 @@ function pharmacyInitials(name: string) {
   return name.split(/\s+/).map(w => w[0]).join("").toUpperCase().slice(0, 3);
 }
 
-export default function PriceTable({ prices }: Props) {
+export default function PriceTable({ prices, medicineName }: Props) {
   const [nhsExpanded, setNhsExpanded] = useState(false);
 
   const nhsPrices = useMemo(
@@ -52,6 +53,9 @@ export default function PriceTable({ prices }: Props) {
   const rxSaving  = !buyOtc && retailCheapestVal !== null ? retailCheapestVal - RX_CHARGE : null;
 
   if (prices.length === 0) {
+    const shoppingUrl = medicineName
+      ? `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(medicineName)}`
+      : null;
     return (
       <div className="text-center py-12">
         <div className="w-14 h-14 rounded-full bg-[var(--color-surface-2)] flex items-center justify-center mx-auto mb-4">
@@ -59,10 +63,23 @@ export default function PriceTable({ prices }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
           </svg>
         </div>
-        <p className="font-semibold text-[var(--color-foreground)] mb-1">Price data coming soon</p>
-        <p className="text-sm text-[var(--color-muted)]">
-          Live pharmacy prices will be added as feeds are connected.
+        <p className="font-semibold text-[var(--color-foreground)] mb-1">Check retailer for current price</p>
+        <p className="text-sm text-[var(--color-muted)] mb-5">
+          We don&apos;t have live pricing for this product yet.
         </p>
+        {shoppingUrl && (
+          <a
+            href={shoppingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            Search on Google Shopping
+          </a>
+        )}
       </div>
     );
   }
