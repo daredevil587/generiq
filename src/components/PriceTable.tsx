@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { PriceRow } from "@/lib/medicines-dal";
-import { formatGBP } from "@/lib/format-utils";
+import { formatGBP, pricePerUnit } from "@/lib/format-utils";
 import { NHS_RX_CHARGE, PPC_ANNUAL, PPC_3MONTH } from "@/lib/config";
 
 interface Props {
@@ -103,20 +103,23 @@ export default function PriceTable({ prices, medicineName }: Props) {
                 <p className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums leading-none">
                   {formatGBP(retailPrices[0].price_gbp)}
                 </p>
-                {retailPrices[0].pharmacy_url && (
-                  <a
-                    href={retailPrices[0].pharmacy_url}
-                    target="_blank"
-                    rel="noopener noreferrer sponsored"
-                    onClick={e => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 mt-2 text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1.5 rounded-full transition-colors"
-                  >
-                    Buy now
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
+                {pricePerUnit(retailPrices[0].price_gbp, retailPrices[0].pack_size) && (
+                  <p className="text-xs text-white/60 tabular-nums mt-0.5">
+                    {pricePerUnit(retailPrices[0].price_gbp, retailPrices[0].pack_size)}
+                  </p>
                 )}
+                <a
+                  href={`/go/${retailPrices[0].id}`}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  onClick={e => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 mt-2 text-xs bg-white/20 hover:bg-white/30 text-white font-semibold px-3 py-1.5 rounded-full transition-colors"
+                >
+                  Buy now
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
               </div>
             </div>
           </div>
@@ -299,43 +302,44 @@ export default function PriceTable({ prices, medicineName }: Props) {
                     {isCheapest && <span className="text-xs text-[var(--color-brand)] font-semibold">Cheapest</span>}
                   </div>
 
-                  {/* Stock */}
-                  <div className="hidden sm:block">
+                  {/* Stock — visible on all screens */}
+                  <div>
                     {p.in_stock ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                        In stock
+                      <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                        <span className="hidden sm:inline">In stock</span>
                       </span>
                     ) : (
-                      <span className="text-xs text-[var(--color-muted)]">Out of stock</span>
+                      <span className="text-xs text-[var(--color-muted)] whitespace-nowrap hidden sm:inline">Out of stock</span>
                     )}
                   </div>
 
-                  {/* Price + buy link */}
+                  {/* Price + per-unit */}
                   <div className="text-right shrink-0">
                     <p className={`font-bold tabular-nums ${isCheapest ? "text-[var(--color-brand)] text-lg" : "text-[var(--color-foreground)]"}`}>
                       {formatGBP(p.price_gbp)}
+                      {diff > 0.005 && (
+                        <span className="ml-1 text-xs font-normal text-[var(--color-muted)]">+{formatGBP(diff)}</span>
+                      )}
                     </p>
-                    {diff > 0.005 && (
-                      <p className="text-xs text-[var(--color-muted)] tabular-nums">+{formatGBP(diff)}</p>
+                    {pricePerUnit(p.price_gbp, p.pack_size) && (
+                      <p className="text-xs text-[var(--color-muted)] tabular-nums">{pricePerUnit(p.price_gbp, p.pack_size)}</p>
                     )}
                   </div>
 
-                  {p.pharmacy_url && (
-                    <a
-                      href={p.pharmacy_url}
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                      onClick={e => e.stopPropagation()}
-                      className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                        isCheapest
-                          ? "bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-dark)]"
-                          : "border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
-                      }`}
-                    >
-                      Buy
-                    </a>
-                  )}
+                  <a
+                    href={`/go/${p.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                    onClick={e => e.stopPropagation()}
+                    className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                      isCheapest
+                        ? "bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-dark)]"
+                        : "border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                    }`}
+                  >
+                    Buy
+                  </a>
                 </div>
               );
             })}

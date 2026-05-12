@@ -1,12 +1,13 @@
 import SearchBar from "@/components/SearchBar";
 import MedicineCard from "@/components/MedicineCard";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { searchMedicines, getAllCategories, getSkincareMeta, getSearchTabCounts } from "@/lib/medicines-dal";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/site-url";
 
 interface Props {
-  searchParams: Promise<{ q?: string; page?: string; tab?: string; gender?: string; subcategory?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; tab?: string; gender?: string; subcategory?: string; sort?: string; priced?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -93,9 +94,13 @@ export default async function SearchPage({ searchParams }: Props) {
   const subcategory = params.subcategory ?? "";
   const page        = Math.max(1, parseInt(params.page ?? "1", 10));
   const offset      = (page - 1) * PAGE_SIZE;
+  const sort        = ["relevance", "price_asc", "price_desc", "name_asc"].includes(params.sort ?? "")
+                        ? (params.sort ?? "relevance")
+                        : "relevance";
+  const pricedOnly  = params.priced === "1";
 
   const [{ rows, total }, categories, skincareMeta, tabCounts] = await Promise.all([
-    searchMedicines(query, PAGE_SIZE, offset, tab, gender || undefined, subcategory || undefined),
+    searchMedicines(query, PAGE_SIZE, offset, tab, gender || undefined, subcategory || undefined, sort, pricedOnly),
     getAllCategories(),
     tab === "skincare" ? getSkincareMeta() : Promise.resolve(null),
     getSearchTabCounts(query),
@@ -104,18 +109,24 @@ export default async function SearchPage({ searchParams }: Props) {
 
   function buildHref(overrides: Record<string, string>) {
     const p = new URLSearchParams();
-    if (query)                                    p.set("q", query);
-    const t = overrides.tab        ?? tab;        if (t && t !== "all") p.set("tab", t);
-    const g = overrides.gender     ?? gender;     if (g)                p.set("gender", g);
-    const s = overrides.subcategory ?? subcategory; if (s)              p.set("subcategory", s);
-    if (overrides.page)                           p.set("page", overrides.page);
+    if (query)                                      p.set("q", query);
+    const t = overrides.tab         ?? tab;         if (t && t !== "all") p.set("tab", t);
+    const g = overrides.gender      ?? gender;      if (g)                p.set("gender", g);
+    const s = overrides.subcategory ?? subcategory; if (s)                p.set("subcategory", s);
+    const so = overrides.sort !== undefined ? overrides.sort : sort;
+    if (so && so !== "relevance")                   p.set("sort", so);
+    const pr = overrides.priced !== undefined ? overrides.priced : (pricedOnly ? "1" : "");
+    if (pr)                                         p.set("priced", pr);
+    if (overrides.page)                             p.set("page", overrides.page);
     const qs = p.toString();
     return `/search${qs ? `?${qs}` : ""}`;
   }
 
-  function tabHref(t: string)    { return buildHref({ tab: t, gender: "", subcategory: "" }); }
-  function genderHref(g: string) { return buildHref({ gender: g, subcategory: "" }); }
-  function subHref(s: string)    { return buildHref({ subcategory: s === subcategory ? "" : s }); }
+  function tabHref(t: string)    { return buildHref({ tab: t, gender: "", subcategory: "", page: "" }); }
+  function genderHref(g: string) { return buildHref({ gender: g, subcategory: "", page: "" }); }
+  function subHref(s: string)    { return buildHref({ subcategory: s === subcategory ? "" : s, page: "" }); }
+  function sortHref(so: string)  { return buildHref({ sort: so, page: "" }); }
+  function pricedHref()          { return buildHref({ priced: pricedOnly ? "" : "1", page: "" }); }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
@@ -124,6 +135,9 @@ export default async function SearchPage({ searchParams }: Props) {
       <div className="max-w-2xl mb-5">
         <SearchBar initialValue={query} size="sm" />
       </div>
+
+      {/* Recently viewed — only when not actively searching */}
+      {!query && <RecentlyViewed />}
 
       {/* Category tabs — scrollable on mobile, with result counts */}
       <div className="flex gap-0.5 mb-5 border-b border-[var(--color-border)] overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -215,7 +229,7 @@ export default async function SearchPage({ searchParams }: Props) {
         {/* Results */}
         <div className="flex-1 min-w-0">
           {/* Results header */}
-          <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="flex flex-wrap items-center justify-between mb-4 gap-3">
             <h1 className="text-base sm:text-lg font-semibold text-[var(--color-foreground)]">
               {query ? (
                 <>
@@ -233,11 +247,38 @@ export default async function SearchPage({ searchParams }: Props) {
                 </>
               )}
             </h1>
-            {(query || gender || subcategory) && (
-              <Link href={tabHref(tab)} className="text-sm text-[var(--color-muted)] hover:text-[var(--color-brand)] shrink-0">
-                Clear ×
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Priced only toggle */}
+              <Link href={pricedHref()}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  pricedOnly
+                    ? "bg-[var(--color-brand)] text-white border-[var(--color-brand)]"
+                    : "border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                }`}>
+                Has prices
               </Link>
-            )}
+              {/* Sort */}
+              {[
+                { value: "relevance", label: "Best match" },
+                { value: "price_asc", label: "Price ↑" },
+                { value: "price_desc", label: "Price ↓" },
+                { value: "name_asc", label: "A–Z" },
+              ].map(opt => (
+                <Link key={opt.value} href={sortHref(opt.value)}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                    sort === opt.value
+                      ? "bg-[var(--color-brand)] text-white border-[var(--color-brand)]"
+                      : "border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                  }`}>
+                  {opt.label}
+                </Link>
+              ))}
+              {(query || gender || subcategory || sort !== "relevance" || pricedOnly) && (
+                <Link href={tabHref(tab)} className="text-xs text-[var(--color-muted)] hover:text-[var(--color-brand)]">
+                  Clear ×
+                </Link>
+              )}
+            </div>
           </div>
 
           {rows.length > 0 ? (

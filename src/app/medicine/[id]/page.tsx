@@ -10,8 +10,11 @@ import {
 import { formatGBP } from "@/lib/format-utils";
 import PriceTable from "@/components/PriceTable";
 import BackButton from "@/components/BackButton";
+import TrackView from "@/components/TrackView";
+import WatchPrice from "@/components/WatchPrice";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/site-url";
+import { slugify } from "@/lib/format-utils";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -126,12 +129,16 @@ export default async function MedicinePage({ params }: Props) {
                  : "Medicines";
   const fallbackHref = `/search?tab=${tabKey}`;
 
+  // Retail min price (for TrackView and WatchPrice)
+  const retailMinPrice = retailPrices[0]?.price_gbp ?? null;
+
   return (
     <>
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
     />
+    <TrackView id={medicine.id} name={medicine.name} category={medicine.category} min_price={retailMinPrice} />
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
       {/* Back button + breadcrumb */}
@@ -192,15 +199,19 @@ export default async function MedicinePage({ params }: Props) {
           </p>
         )}
 
-        {/* Active ingredients */}
+        {/* Active ingredients — linked to ingredient pages */}
         {ingredients.filter(i => i.is_active).length > 0 && (
           <div className="mt-4">
             <p className="text-xs text-[var(--color-muted)] font-medium mb-2 uppercase tracking-wide">Active ingredients</p>
             <div className="flex flex-wrap gap-2">
               {ingredients.filter(i => i.is_active).map((ing) => (
-                <span key={ing.id} className="text-xs bg-[var(--color-brand-light)] text-[var(--color-brand)] px-2.5 py-1 rounded-full font-medium">
+                <a
+                  key={ing.id}
+                  href={`/ingredient/${slugify(ing.ingredient_name)}`}
+                  className="text-xs bg-[var(--color-brand-light)] text-[var(--color-brand)] px-2.5 py-1 rounded-full font-medium hover:opacity-80 transition-opacity"
+                >
                   {ing.ingredient_name}{ing.quantity ? ` ${ing.quantity}` : ""}
-                </span>
+                </a>
               ))}
             </div>
           </div>
@@ -290,6 +301,15 @@ export default async function MedicinePage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* Price drop alert */}
+      <div className="mt-5">
+        <WatchPrice
+          medicineId={medicine.id}
+          medicineName={medicine.name}
+          currentPrice={retailMinPrice}
+        />
+      </div>
 
       {/* Disclaimer */}
       <div className="mt-5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-xl p-4">
