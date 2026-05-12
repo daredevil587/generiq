@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-const BarcodeScanner = dynamic(() => import("./BarcodeScanner"), { ssr: false });
+const OcrScanner = dynamic(() => import("./OcrScanner"), { ssr: false });
 
 interface Props {
   initialValue?: string;
@@ -90,16 +90,17 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
 
           {/* Right-side buttons */}
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-            {/* Camera / barcode scan button */}
+            {/* OCR camera scan button */}
             <button
               type="button"
               onClick={() => setScannerOpen(true)}
-              aria-label="Scan barcode"
-              title="Scan product barcode"
+              aria-label="Scan medicine label with camera"
+              title="Scan medicine label"
               className={`flex items-center justify-center rounded-lg border border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-brand)] hover:border-[var(--color-brand)] transition-colors bg-[var(--color-surface)] ${size === "lg" ? "w-9 h-9" : "w-7 h-7"}`}
             >
               <svg className={size === "lg" ? "w-4 h-4" : "w-3.5 h-3.5"} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4H8a4 4 0 00-4 4v8a4 4 0 004 4h8a4 4 0 004-4v-4M16 4h4m0 0v4m0-4L12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                <circle cx="12" cy="13" r="4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -129,8 +130,8 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
       )}
     </div>
 
-    {/* Barcode scanner modal — lazy loaded */}
-    {scannerOpen && <BarcodeScanner onClose={() => setScannerOpen(false)} />}
+    {/* OCR scanner modal — lazy loaded */}
+    {scannerOpen && <OcrScanner onClose={() => setScannerOpen(false)} />}
     </>
   );
 }
