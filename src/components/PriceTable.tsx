@@ -3,10 +3,7 @@
 import { useState, useMemo } from "react";
 import type { PriceRow } from "@/lib/medicines-dal";
 import { formatGBP } from "@/lib/format-utils";
-
-const RX_CHARGE   = 9.90;
-const PPC_ANNUAL  = 111.60;
-const PPC_3MONTH  = 30.25;
+import { NHS_RX_CHARGE, PPC_ANNUAL, PPC_3MONTH } from "@/lib/config";
 
 interface Props {
   prices: PriceRow[];
@@ -48,9 +45,9 @@ export default function PriceTable({ prices, medicineName }: Props) {
   const retailSaving      = retailCheapestVal !== null && retailDearestVal !== null && retailDearestVal > retailCheapestVal
                               ? retailDearestVal - retailCheapestVal : null;
 
-  const buyOtc    = retailCheapestVal !== null && retailCheapestVal < RX_CHARGE;
-  const otcSaving = buyOtc && retailCheapestVal !== null ? RX_CHARGE - retailCheapestVal : null;
-  const rxSaving  = !buyOtc && retailCheapestVal !== null ? retailCheapestVal - RX_CHARGE : null;
+  const buyOtc    = retailCheapestVal !== null && retailCheapestVal < NHS_RX_CHARGE;
+  const otcSaving = buyOtc && retailCheapestVal !== null ? NHS_RX_CHARGE - retailCheapestVal : null;
+  const rxSaving  = !buyOtc && retailCheapestVal !== null ? retailCheapestVal - NHS_RX_CHARGE : null;
 
   if (prices.length === 0) {
     const shoppingUrl = medicineName
@@ -177,7 +174,7 @@ export default function PriceTable({ prices, medicineName }: Props) {
               <div className="px-4 py-4">
                 <p className="text-sm text-[var(--color-foreground)] mb-3">
                   Via NHS prescription you pay{" "}
-                  <strong>£{RX_CHARGE.toFixed(2)} per item</strong>{" "}
+                  <strong>£{NHS_RX_CHARGE.toFixed(2)} per item</strong>{" "}
                   regardless of the medicine&apos;s actual cost.
                 </p>
                 <div className="rounded-lg border border-[var(--color-border)] overflow-hidden text-sm">
@@ -187,7 +184,7 @@ export default function PriceTable({ prices, medicineName }: Props) {
                   </div>
                   <div className="flex items-center justify-between px-3 py-2.5 border-t border-[var(--color-border)]">
                     <span className="text-[var(--color-muted)]">Your prescription charge</span>
-                    <span className="font-bold tabular-nums text-[var(--color-foreground)]">£{RX_CHARGE.toFixed(2)}</span>
+                    <span className="font-bold tabular-nums text-[var(--color-foreground)]">£{NHS_RX_CHARGE.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -199,7 +196,7 @@ export default function PriceTable({ prices, medicineName }: Props) {
                   <div className="rounded-lg border border-[var(--color-border)] overflow-hidden text-sm mb-3">
                     <div className="flex items-center justify-between px-3 py-2.5 bg-[var(--color-surface-2)]">
                       <span className="text-[var(--color-muted)]">NHS prescription charge</span>
-                      <span className="font-semibold tabular-nums">£{RX_CHARGE.toFixed(2)}</span>
+                      <span className="font-semibold tabular-nums">£{NHS_RX_CHARGE.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center justify-between px-3 py-2.5 border-t border-[var(--color-border)]">
                       <span className="text-[var(--color-muted)]">Cheapest retail ({retailPrices[0]?.pharmacy_name})</span>

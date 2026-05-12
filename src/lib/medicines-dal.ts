@@ -59,23 +59,44 @@ export async function getFeaturedMedicines(limit = 6): Promise<MedicineWithPrice
   return res.rows;
 }
 
-// tab values: 'all' | 'medicines' | 'supplements' | 'skincare'
-function tabFilter(tab: string): string {
-  if (tab === 'supplements') return `AND m.category = 'supplement'`;
-  if (tab === 'skincare')    return `AND m.category = 'skincare'`;
-  if (tab === 'medicines')   return `AND m.category NOT IN ('supplement', 'skincare')`;
-  return '';
-}
+// Builds a WHERE clause + params array from search filters.
+// All user-supplied values go through parameterised placeholders — no interpolation.
+function buildWhere(
+  query: string,
+  tab: string,
+  gender?: string,
+  subcategory?: string,
+): { where: string; params: unknown[] } {
+  const params: unknown[] = [];
+  const conditions: string[] = [];
 
-function genderFilter(gender?: string): string {
-  if (gender === 'men' || gender === 'women' || gender === 'unisex')
-    return `AND m.gender = '${gender}'`;
-  return '';
-}
+  if (query.trim()) {
+    params.push(`%${query.toLowerCase()}%`);
+    const n = params.length;
+    conditions.push(
+      `(LOWER(m.name) LIKE $${n} OR LOWER(m.generic_name) LIKE $${n}` +
+      ` OR LOWER(m.active_ingredient) LIKE $${n} OR LOWER(m.category) LIKE $${n}` +
+      ` OR LOWER(m.brand_names) LIKE $${n})`,
+    );
+  }
 
-function subcategoryFilter(subcategory?: string): string {
-  if (!subcategory) return '';
-  return `AND m.subcategory = '${subcategory.replace(/'/g, "''")}'`;
+  // Tab values are validated against a fixed set — safe to inline
+  if (tab === 'supplements') conditions.push(`m.category = 'supplement'`);
+  else if (tab === 'skincare')  conditions.push(`m.category = 'skincare'`);
+  else if (tab === 'medicines') conditions.push(`m.category NOT IN ('supplement','skincare')`);
+
+  if (gender === 'men' || gender === 'women' || gender === 'unisex') {
+    params.push(gender);
+    conditions.push(`m.gender = $${params.length}`);
+  }
+
+  if (subcategory?.trim()) {
+    params.push(subcategory.trim());
+    conditions.push(`m.subcategory = $${params.length}`);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  return { where, params };
 }
 
 export async function getSkincareMeta(): Promise<{
@@ -104,54 +125,32 @@ export async function searchMedicines(
   gender?: string,
   subcategory?: string,
 ): Promise<{ rows: MedicineWithPrice[]; total: number }> {
-  const tf = tabFilter(tab);
-  const gf = genderFilter(gender);
-  const sf = subcategoryFilter(subcategory);
+  const { where, params } = buildWhere(query, tab, gender, subcategory);
 
-  if (!query.trim()) {
-    const countRes = await pool.query<{ total: string }>(
-      `SELECT COUNT(*) AS total FROM medicines m WHERE 1=1 ${tf} ${gf} ${sf}`,
-    );
-    const total = parseInt(countRes.rows[0].total, 10);
-    const res = await pool.query<MedicineWithPrice>(`
-      SELECT m.*, MIN(pp.price_gbp) AS min_price
-      FROM   medicines m
-      LEFT   JOIN pharmacy_prices pp ON pp.medicine_id = m.id
-      WHERE  1=1 ${tf} ${gf} ${sf}
-      GROUP  BY m.id
-      ORDER  BY (m.source = 'seed') DESC, m.name
-      LIMIT  $1 OFFSET $2
-    `, [limit, offset]);
-    return { rows: res.rows, total };
-  }
-
-  const q = `%${query.toLowerCase()}%`;
-  const countRes = await pool.query<{ total: string }>(`
-    SELECT COUNT(DISTINCT m.id) AS total
-    FROM   medicines m
-    WHERE  (LOWER(m.name) LIKE $1
-        OR LOWER(m.generic_name) LIKE $1
-        OR LOWER(m.active_ingredient) LIKE $1
-        OR LOWER(m.category) LIKE $1
-        OR LOWER(m.brand_names) LIKE $1)
-    ${tf} ${gf} ${sf}
-  `, [q]);
+  const countRes = await pool.query<{ total: string }>(
+    `SELECT COUNT(DISTINCT m.id) AS total FROM medicines m ${where}`,
+    [...params],
+  );
   const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataParams = [...params];
+  dataParams.push(limit);
+  const limitIdx = dataParams.length;
+  dataParams.push(offset);
+  const offsetIdx = dataParams.length;
 
   const res = await pool.query<MedicineWithPrice>(`
     SELECT m.*, MIN(pp.price_gbp) AS min_price
     FROM   medicines m
     LEFT   JOIN pharmacy_prices pp ON pp.medicine_id = m.id
-    WHERE  (LOWER(m.name) LIKE $1
-        OR LOWER(m.generic_name) LIKE $1
-        OR LOWER(m.active_ingredient) LIKE $1
-        OR LOWER(m.category) LIKE $1
-        OR LOWER(m.brand_names) LIKE $1)
-    ${tf} ${gf} ${sf}
+    ${where}
     GROUP  BY m.id
-    ORDER  BY (m.source = 'seed') DESC, m.name
-    LIMIT  $2 OFFSET $3
-  `, [q, limit, offset]);
+    ORDER  BY
+      (MIN(pp.price_gbp) IS NOT NULL) DESC,
+      (m.source = 'seed') DESC,
+      m.name ASC
+    LIMIT  $${limitIdx} OFFSET $${offsetIdx}
+  `, dataParams);
 
   return { rows: res.rows, total };
 }
@@ -247,4 +246,51 @@ export async function getAllCategories(): Promise<string[]> {
      ORDER  BY category`,
   );
   return res.rows.map((r) => r.category);
+}
+
+// Products that actually have retail prices — used for the homepage "live deals" row.
+export async function getTopDeals(limit = 6): Promise<MedicineWithPrice[]> {
+  const res = await pool.query<MedicineWithPrice>(`
+    SELECT m.*, MIN(pp.price_gbp) AS min_price
+    FROM   medicines m
+    JOIN   pharmacy_prices pp ON pp.medicine_id = m.id
+                              AND pp.source != 'nhs_drug_tariff'
+    GROUP  BY m.id
+    ORDER  BY (m.source = 'seed') DESC, m.name ASC
+    LIMIT  $1
+  `, [limit]);
+  return res.rows;
+}
+
+// Medicines sharing the same active ingredient / generic name — shown as
+// cheaper alternatives on branded product pages.
+export async function getGenericAlternatives(
+  medicineId: number,
+  genericName: string | null,
+  activeIngredient: string | null,
+  limit = 5,
+): Promise<MedicineWithPrice[]> {
+  // Use the first word of active_ingredient or generic_name as the keyword
+  const keyword = ((activeIngredient || genericName) ?? '')
+    .split(/\s+/)[0].trim().toLowerCase();
+  if (!keyword || keyword.length < 3) return [];
+
+  const res = await pool.query<MedicineWithPrice>(`
+    SELECT m.*, MIN(pp.price_gbp) AS min_price
+    FROM   medicines m
+    JOIN   pharmacy_prices pp ON pp.medicine_id = m.id
+                              AND pp.source != 'nhs_drug_tariff'
+    WHERE  m.id != $1
+      AND  m.category NOT IN ('supplement', 'skincare')
+      AND  (
+        LOWER(m.name)              LIKE $2
+        OR LOWER(m.generic_name)   LIKE $2
+        OR LOWER(m.active_ingredient) LIKE $2
+      )
+    GROUP  BY m.id
+    ORDER  BY MIN(pp.price_gbp) ASC NULLS LAST
+    LIMIT  $3
+  `, [medicineId, `%${keyword}%`, limit]);
+
+  return res.rows;
 }

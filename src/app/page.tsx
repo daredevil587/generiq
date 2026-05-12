@@ -1,7 +1,9 @@
 import SearchBar from "@/components/SearchBar";
+import MedicineCard from "@/components/MedicineCard";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/site-url";
+import { getTopDeals } from "@/lib/medicines-dal";
 
 export const revalidate = 3600;
 
@@ -69,7 +71,9 @@ const HOW_IT_WORKS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const deals = await getTopDeals(6);
+
   return (
     <div className="min-h-screen">
 
@@ -130,6 +134,23 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── Live deals ─────────────────────────────────────────────────────── */}
+      {deals.length > 0 && (
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-bold text-lg text-[var(--color-foreground)]">Compare prices right now</h2>
+            <Link href="/search" className="text-sm text-[var(--color-brand)] font-semibold hover:underline underline-offset-2">
+              Browse all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {deals.map((m) => (
+              <MedicineCard key={m.id} medicine={m} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── How it works ───────────────────────────────────────────────────── */}
       <section className="border-t border-[var(--color-border)] bg-[var(--color-surface-2)]">

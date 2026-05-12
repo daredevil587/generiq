@@ -4,8 +4,10 @@ import {
   getMedicineById,
   getPricesByMedicineId,
   getIngredientsByMedicineId,
+  getGenericAlternatives,
   parseBrandNames,
 } from "@/lib/medicines-dal";
+import { formatGBP } from "@/lib/format-utils";
 import PriceTable from "@/components/PriceTable";
 import BackButton from "@/components/BackButton";
 import type { Metadata } from "next";
@@ -65,6 +67,12 @@ export default async function MedicinePage({ params }: Props) {
   ]);
 
   if (!medicine) notFound();
+
+  const alternatives = await getGenericAlternatives(
+    numId,
+    medicine.generic_name,
+    medicine.active_ingredient,
+  );
 
   const brands = parseBrandNames(medicine.brand_names);
 
@@ -236,6 +244,52 @@ export default async function MedicinePage({ params }: Props) {
         </h2>
         <PriceTable prices={prices} medicineName={medicine.name} />
       </div>
+
+      {/* Generic alternatives */}
+      {alternatives.length > 0 && (
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6 mt-5">
+          <h2 className="font-bold text-[var(--color-foreground)] text-base mb-1 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[var(--color-brand)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Also compare
+          </h2>
+          <p className="text-xs text-[var(--color-muted)] mb-4">
+            Same active ingredient — check if a cheaper option is available
+          </p>
+          <div className="divide-y divide-[var(--color-border)]">
+            {alternatives.map((alt) => (
+              <Link
+                key={alt.id}
+                href={`/medicine/${alt.id}`}
+                className="flex items-center gap-3 py-3 group hover:bg-[var(--color-surface-2)] -mx-5 px-5 sm:-mx-6 sm:px-6 transition-colors first:rounded-t-xl last:rounded-b-xl"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-[var(--color-foreground)] group-hover:text-[var(--color-brand)] transition-colors leading-snug truncate">
+                    {alt.name}
+                  </p>
+                  {alt.dosage_form && (
+                    <p className="text-xs text-[var(--color-muted)] mt-0.5">{alt.dosage_form}</p>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  {alt.min_price ? (
+                    <>
+                      <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-wide">from</p>
+                      <p className="font-bold text-[var(--color-brand)] tabular-nums">{formatGBP(alt.min_price)}</p>
+                    </>
+                  ) : (
+                    <span className="text-xs text-[var(--color-muted)]">View</span>
+                  )}
+                </div>
+                <svg className="w-4 h-4 text-[var(--color-muted)] group-hover:text-[var(--color-brand)] shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div className="mt-5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-xl p-4">
