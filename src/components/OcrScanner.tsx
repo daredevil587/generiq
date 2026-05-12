@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { ScanResult } from "@/app/api/scan/route";
 
 type Status = "camera" | "processing" | "done" | "error";
 
@@ -9,13 +10,14 @@ const CORNER = "absolute w-7 h-7 border-white border-2";
 
 export default function OcrScanner({ onClose }: { onClose: () => void }) {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef  = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [status, setStatus] = useState<Status>("camera");
+
+  const [status,      setStatus]      = useState<Status>("camera");
   const [capturedSrc, setCapturedSrc] = useState<string | null>(null);
-  const [foundText, setFoundText] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [result,      setResult]      = useState<ScanResult | null>(null);
+  const [errorMsg,    setErrorMsg]    = useState("");
 
   useEffect(() => {
     startCamera();
@@ -42,111 +44,65 @@ export default function OcrScanner({ onClose }: { onClose: () => void }) {
   }
 
   async function capture() {
-    const video = videoRef.current;
+    const video  = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2) return;
 
-    // Draw frame to canvas at native resolution
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(video, 0, 0);
+    // Draw frame then downscale to max 1024px wide (keeps payload small, Vision API still reads fine print)
+    const MAX = 1024;
+    const ratio = Math.min(1, MAX / video.videoWidth);
+    canvas.width  = Math.round(video.videoWidth  * ratio);
+    canvas.height = Math.round(video.videoHeight * ratio);
+    canvas.getContext("2d")!.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    setCapturedSrc(canvas.toDataURL("image/jpeg", 0.9));
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    setCapturedSrc(dataUrl);
     setStatus("processing");
     stopCamera();
 
-    await runOcr(canvas, ctx);
+    await analyzeImage(dataUrl);
   }
 
-  async function runOcr(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+  async function analyzeImage(dataUrl: string) {
     try {
-      // Downscale to max 1280px wide for faster OCR without quality loss
-      let src: HTMLCanvasElement = canvas;
-      const MAX = 1280;
-      if (canvas.width > MAX) {
-        const ratio = MAX / canvas.width;
-        const small = document.createElement("canvas");
-        small.width = MAX;
-        small.height = Math.round(canvas.height * ratio);
-        small.getContext("2d")!.drawImage(canvas, 0, 0, small.width, small.height);
-        src = small;
-      } else {
-        // Pre-process: boost contrast for better OCR accuracy
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        boostContrast(imgData);
-        ctx.putImageData(imgData, 0, 0);
-      }
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
 
-      // Dynamic import — Tesseract bundle only loads when scanner is opened
-      const { createWorker } = await import("tesseract.js");
-      const worker = await createWorker("eng", 1, { logger: () => {} });
-      const { data: { text } } = await worker.recognize(src);
-      await worker.terminate();
+      const data = await res.json();
 
-      const query = parseQuery(text);
-      if (!query) {
+      if (!res.ok) {
         setStatus("error");
-        setErrorMsg("Couldn't read clear text. Try better lighting or hold the camera steady.");
+        setErrorMsg(data.error ?? "Analysis failed. Please try again.");
         return;
       }
 
-      setFoundText(query);
+      const scan = data as ScanResult;
+      const query = scan.name || scan.ingredients[0] || null;
+
+      if (!query) {
+        setStatus("error");
+        setErrorMsg("Couldn't identify a medicine name. Try a clearer photo of the label.");
+        return;
+      }
+
+      setResult(scan);
       setStatus("done");
       setTimeout(() => {
         router.push(`/search?q=${encodeURIComponent(query)}`);
         onClose();
-      }, 900);
+      }, 1400);
     } catch {
       setStatus("error");
-      setErrorMsg("OCR failed. Please try again.");
+      setErrorMsg("Network error. Please check your connection and try again.");
     }
-  }
-
-  function boostContrast(imgData: ImageData) {
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      // Greyscale + contrast boost
-      const avg = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114);
-      const v = Math.min(255, Math.max(0, (avg - 128) * 1.4 + 128));
-      d[i] = d[i + 1] = d[i + 2] = v;
-    }
-  }
-
-  function parseQuery(raw: string): string {
-    const lines = raw
-      .split("\n")
-      .map((l) => l.trim())
-      .filter((l) => l.length >= 3)
-      .filter((l) => /[a-zA-Z]{2,}/.test(l))         // must contain letters
-      .filter((l) => !/^[\d\s\W]+$/.test(l));          // not digits/symbols only
-
-    if (!lines.length) return "";
-
-    // Score each line: prefer medicine-keyword hits and moderate length
-    const scored = lines.map((line) => {
-      let score = 0;
-      if (/\b(mg|ml|mcg|tablet|capsule|gel|cream|spray|drops|solution|suspension|vitamin|supplement|ingredient|contains|each|active)\b/i.test(line)) score += 3;
-      if (line.length >= 5 && line.length <= 50) score += 2;
-      if (/^[A-Z]/.test(line)) score += 1;            // starts with capital — likely a name
-      return { line, score };
-    });
-
-    const best = scored.sort((a, b) => b.score - a.score)[0].line;
-
-    // Clean: strip special chars, take first 5 words
-    return best
-      .replace(/[^a-zA-Z0-9\s\-+]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .split(" ")
-      .slice(0, 5)
-      .join(" ");
   }
 
   function retry() {
     setCapturedSrc(null);
-    setFoundText("");
+    setResult(null);
     setErrorMsg("");
     setStatus("camera");
     startCamera();
@@ -166,8 +122,8 @@ export default function OcrScanner({ onClose }: { onClose: () => void }) {
             <h2 className="text-white font-semibold text-base sm:text-lg">Scan medicine label</h2>
             <p className="text-white/50 text-xs mt-0.5">
               {status === "camera"     && "Point at medicine box or label, then tap Capture"}
-              {status === "processing" && "Reading text from image…"}
-              {status === "done"       && "Searching prices…"}
+              {status === "processing" && "Analysing image with AI…"}
+              {status === "done"       && "Found — searching prices…"}
               {status === "error"      && "Scan failed"}
             </p>
           </div>
@@ -200,7 +156,7 @@ export default function OcrScanner({ onClose }: { onClose: () => void }) {
             <img src={capturedSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
           )}
 
-          {/* Guide frame overlay — camera mode only */}
+          {/* Guide frame — camera mode */}
           {status === "camera" && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               <div className="absolute inset-0 bg-black/30" />
@@ -219,49 +175,60 @@ export default function OcrScanner({ onClose }: { onClose: () => void }) {
 
           {/* Processing overlay */}
           {status === "processing" && (
-            <div className="absolute inset-0 bg-black/55 z-10 flex flex-col items-center justify-center gap-4">
+            <div className="absolute inset-0 bg-black/60 z-10 flex flex-col items-center justify-center gap-4">
               <div className="w-12 h-12 border-[3px] border-white/20 border-t-white rounded-full animate-spin" />
               <div className="text-center">
-                <p className="text-white font-medium text-sm">Extracting text…</p>
-                <p className="text-white/40 text-xs mt-1">May take a few seconds</p>
+                <p className="text-white font-medium text-sm">AI is reading the label…</p>
+                <p className="text-white/40 text-xs mt-1">Usually takes 2–4 seconds</p>
               </div>
             </div>
           )}
 
           {/* Done overlay */}
-          {status === "done" && (
-            <div className="absolute inset-0 bg-black/55 z-10 flex flex-col items-center justify-center gap-3 px-6">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-brand)] flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          {status === "done" && result && (
+            <div className="absolute inset-0 bg-black/65 z-10 flex flex-col items-center justify-center gap-3 px-6">
+              <div className="w-10 h-10 rounded-full bg-[var(--color-brand)] flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div className="text-center">
-                <p className="text-white/60 text-xs mb-1">Searching for</p>
-                <p className="text-white font-semibold text-sm">&ldquo;{foundText}&rdquo;</p>
+              <div className="text-center w-full">
+                {result.name && (
+                  <p className="text-white font-bold text-base leading-tight">{result.name}</p>
+                )}
+                {result.brand && result.brand !== result.name && (
+                  <p className="text-white/60 text-xs mt-0.5">by {result.brand}</p>
+                )}
+                {result.ingredients.length > 0 && (
+                  <div className="mt-2 flex flex-wrap justify-center gap-1">
+                    {result.ingredients.slice(0, 4).map((ing) => (
+                      <span key={ing} className="bg-white/10 text-white/80 text-xs px-2 py-0.5 rounded-full">
+                        {ing}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Hidden canvas */}
+        {/* Hidden canvas for capture */}
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Footer */}
         <div className="px-5 py-5 shrink-0 min-h-[96px] flex flex-col items-center justify-center gap-3">
 
-          {/* Capture button */}
           {status === "camera" && (
             <button
               onClick={capture}
-              aria-label="Capture photo for OCR"
+              aria-label="Capture photo"
               className="w-16 h-16 rounded-full bg-white hover:bg-white/90 active:scale-95 transition-all shadow-lg flex items-center justify-center"
             >
               <div className="w-12 h-12 rounded-full border-[3px] border-black/20" />
             </button>
           )}
 
-          {/* Error state */}
           {status === "error" && (
             <>
               <p className="text-red-400 text-sm text-center leading-relaxed max-w-xs">{errorMsg}</p>
@@ -274,10 +241,9 @@ export default function OcrScanner({ onClose }: { onClose: () => void }) {
             </>
           )}
 
-          {/* Processing / done hint */}
           {(status === "processing" || status === "done") && (
-            <p className="text-white/30 text-xs text-center">
-              {status === "processing" ? "Tesseract OCR is reading the label…" : "Redirecting to results…"}
+            <p className="text-white/25 text-xs text-center">
+              {status === "processing" ? "Powered by OpenAI Vision" : "Redirecting to search results…"}
             </p>
           )}
         </div>
