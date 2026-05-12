@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-const OcrScanner = dynamic(() => import("./OcrScanner"), { ssr: false });
+const BarcodeScanner = dynamic(() => import("./BarcodeScanner"), { ssr: false });
 
 interface Props {
   initialValue?: string;
@@ -130,8 +130,8 @@ export default function SearchBar({ initialValue = "", autoFocus = false, size =
       )}
     </div>
 
-    {/* OCR scanner modal — lazy loaded */}
-    {scannerOpen && <OcrScanner onClose={() => setScannerOpen(false)} />}
+    {/* Barcode scanner modal — lazy loaded */}
+    {scannerOpen && <BarcodeScanner onClose={() => setScannerOpen(false)} />}
     </>
   );
 }
