@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Terms of Service — GeneriQ",
   description: "Terms and conditions for using the GeneriQ price comparison service.",
+  alternates: { canonical: `${siteUrl}/terms` },
 };
 
 export default function TermsPage() {

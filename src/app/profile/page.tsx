@@ -1,4 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  title: "Profile — GeneriQ",
+  description: "Save your favourite medicines and track prices. Accounts coming soon to GeneriQ.",
+  alternates: { canonical: `${siteUrl}/profile` },
+};
 
 export default function ProfilePage() {
   return (

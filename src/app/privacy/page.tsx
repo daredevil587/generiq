@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — GeneriQ",
   description: "How GeneriQ collects, uses and protects your data.",
+  alternates: { canonical: `${siteUrl}/privacy` },
 };
 
 export default function PrivacyPage() {

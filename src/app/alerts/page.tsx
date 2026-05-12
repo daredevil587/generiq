@@ -1,4 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
+
+export const metadata: Metadata = {
+  title: "Price Alerts — GeneriQ",
+  description: "Get notified when medicine prices drop. Coming soon to GeneriQ.",
+  alternates: { canonical: `${siteUrl}/alerts` },
+};
 
 export default function AlertsPage() {
   return (

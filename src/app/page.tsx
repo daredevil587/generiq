@@ -1,7 +1,22 @@
 import SearchBar from "@/components/SearchBar";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "GeneriQ — Stop Overpaying for Your Health",
+  description: "Compare UK prices for medicines, vitamins, supplements and skincare across Boots, Superdrug, Holland & Barrett and Amazon. Find the cheapest option instantly.",
+  alternates: { canonical: siteUrl },
+  openGraph: {
+    title: "GeneriQ — Stop Overpaying for Your Health",
+    description: "Compare UK prices for 36,000+ medicines, supplements and skincare. Cheapest prices instantly.",
+    url: siteUrl,
+    siteName: "GeneriQ",
+    type: "website",
+  },
+};
 
 const CATEGORIES = [
   {

@@ -2,9 +2,49 @@ import SearchBar from "@/components/SearchBar";
 import MedicineCard from "@/components/MedicineCard";
 import { searchMedicines, getAllCategories, getSkincareMeta, getSearchTabCounts } from "@/lib/medicines-dal";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 
 interface Props {
   searchParams: Promise<{ q?: string; page?: string; tab?: string; gender?: string; subcategory?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const q = params.q?.trim() ?? "";
+  const tab = params.tab ?? "";
+
+  const tabLabel = tab === "medicines" ? "Medicines"
+    : tab === "supplements" ? "Supplements"
+    : tab === "skincare" ? "Skincare & Beauty"
+    : "All products";
+
+  const title = q
+    ? `"${q}" — ${tabLabel} Price Comparison | GeneriQ`
+    : `Search ${tabLabel} — Compare UK Prices | GeneriQ`;
+
+  const description = q
+    ? `Compare UK prices for "${q}" across Boots, Superdrug, Holland & Barrett and Amazon. Find the cheapest option instantly.`
+    : `Browse and compare UK prices for ${tabLabel.toLowerCase()} across Boots, Superdrug, Holland & Barrett and Amazon.`;
+
+  const params_ = new URLSearchParams();
+  if (q) params_.set("q", q);
+  if (tab) params_.set("tab", tab);
+  const qs = params_.toString();
+  const canonicalUrl = `${siteUrl}/search${qs ? `?${qs}` : ""}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "GeneriQ",
+      type: "website",
+    },
+  };
 }
 
 const PAGE_SIZE = 20;

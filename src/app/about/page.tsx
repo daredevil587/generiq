@@ -1,9 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
   title: "About GeneriQ — Health Product Price Comparison",
   description: "Compare prices for medicines, supplements and skincare across UK pharmacies and globally. Stop overpaying for your health.",
+  alternates: { canonical: `${siteUrl}/about` },
+  openGraph: {
+    title: "About GeneriQ — Health Product Price Comparison",
+    description: "Compare prices for medicines, supplements and skincare across UK pharmacies and globally. Stop overpaying for your health.",
+    url: `${siteUrl}/about`,
+    siteName: "GeneriQ",
+    type: "website",
+  },
 };
 
 const CATEGORIES = [

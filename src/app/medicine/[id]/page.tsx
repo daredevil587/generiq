@@ -9,6 +9,7 @@ import {
 import PriceTable from "@/components/PriceTable";
 import BackButton from "@/components/BackButton";
 import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-url";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -18,11 +19,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const numId = parseInt(id, 10);
   if (isNaN(numId)) return {};
-  const medicine = await getMedicineById(numId);
+
+  const [medicine, prices] = await Promise.all([
+    getMedicineById(numId),
+    getPricesByMedicineId(numId),
+  ]);
   if (!medicine) return {};
+
+  const retailPrices = prices.filter(p => p.source !== "nhs_drug_tariff");
+  const minPrice = retailPrices.length > 0
+    ? Math.min(...retailPrices.map(p => parseFloat(p.price_gbp)))
+    : null;
+
+  const priceText = minPrice !== null ? ` Prices from £${minPrice.toFixed(2)}.` : "";
+  const canonicalUrl = `${siteUrl}/medicine/${numId}`;
+
   return {
-    title: `${medicine.name} — Price Comparison | GeneriQ`,
-    description: `Compare UK pharmacy prices for ${medicine.name}. ${medicine.description?.slice(0, 120) ?? ""}`,
+    title: `${medicine.name} Price Comparison UK — Find Cheapest | GeneriQ`,
+    description: `Compare ${medicine.name} prices across Boots, Superdrug, Pharmacy2U and more. Find the cheapest option instantly.${priceText}`,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: `${medicine.name} — Cheapest UK Price | GeneriQ`,
+      description: `Find the cheapest price for ${medicine.name} across UK pharmacies.${priceText}`,
+      url: canonicalUrl,
+      siteName: "GeneriQ",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${medicine.name} — Cheapest UK Price | GeneriQ`,
+      description: `Find the cheapest price for ${medicine.name} across UK pharmacies.${priceText}`,
+    },
   };
 }
 
@@ -41,6 +68,47 @@ export default async function MedicinePage({ params }: Props) {
 
   const brands = parseBrandNames(medicine.brand_names);
 
+  // JSON-LD structured data for Google rich results
+  const retailPrices = prices.filter(p => p.source !== "nhs_drug_tariff")
+    .sort((a, b) => parseFloat(a.price_gbp) - parseFloat(b.price_gbp));
+  const activeIngredients = ingredients.filter(i => i.is_active);
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": medicine.name,
+    "description": medicine.description || `${medicine.name} — UK price comparison`,
+    "url": `${siteUrl}/medicine/${medicine.id}`,
+    ...(activeIngredients.length > 0 && {
+      "activeIngredient": activeIngredients.map(i =>
+        i.quantity ? `${i.ingredient_name} ${i.quantity}` : i.ingredient_name
+      ).join(", "),
+    }),
+    ...(medicine.dosage_form && { "dosageForm": medicine.dosage_form }),
+    ...(brands.length > 0 && {
+      "brand": { "@type": "Brand", "name": brands[0] },
+    }),
+    ...(retailPrices.length > 0 && {
+      "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": parseFloat(retailPrices[0].price_gbp).toFixed(2),
+        "highPrice": parseFloat(retailPrices[retailPrices.length - 1].price_gbp).toFixed(2),
+        "priceCurrency": "GBP",
+        "offerCount": retailPrices.length,
+        "offers": retailPrices.map(p => ({
+          "@type": "Offer",
+          "seller": { "@type": "Organization", "name": p.pharmacy_name },
+          "price": parseFloat(p.price_gbp).toFixed(2),
+          "priceCurrency": "GBP",
+          "availability": p.in_stock
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          ...(p.pharmacy_url && { "url": p.pharmacy_url }),
+        })),
+      },
+    }),
+  };
+
   // Map DB category to tab key and display label
   const tabKey   = medicine.category === "supplement" ? "supplements"
                  : medicine.category === "skincare"   ? "skincare"
@@ -51,6 +119,11 @@ export default async function MedicinePage({ params }: Props) {
   const fallbackHref = `/search?tab=${tabKey}`;
 
   return (
+    <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+    />
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
       {/* Back button + breadcrumb */}
@@ -172,5 +245,6 @@ export default async function MedicinePage({ params }: Props) {
       </div>
 
     </div>
+    </>
   );
 }
