@@ -1,0 +1,223 @@
+11:57:17 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_wbh45uvb
+11:57:17 INFO  Fetching latest dm+d release info from TRUD...
+11:57:18 INFO  Temp files cleaned up
+11:58:11 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_u96w47l8
+11:58:11 INFO  Fetching latest dm+d release info from TRUD...
+11:58:11 INFO  Temp files cleaned up
+11:58:18 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_p2pum4qu
+11:58:18 INFO  Fetching latest dm+d release info from TRUD...
+11:58:19 INFO  Temp files cleaned up
+11:58:41 INFO  Launcher created: F:\geniric iq\generiq\run-dmd-update.bat
+11:58:41 INFO  Scheduled task 'GeneriQ_dmd_weekly' registered: every Monday 08:00
+11:58:41 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_k33_428o
+11:58:41 INFO  Fetching latest dm+d release info from TRUD...
+11:58:42 INFO  Temp files cleaned up
+13:04:07 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import__bcdgnyu
+13:04:07 INFO  Fetching latest dm+d release info from TRUD...
+13:04:08 INFO  Temp files cleaned up
+13:22:34 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_1nyggjrm
+13:22:34 ERROR  File not found: F:\geniric iq\nhsbsa_dmd_5.1.0_20260511000001.zip
+13:22:34 INFO  Temp files cleaned up
+13:24:14 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import__t6z5_xd
+13:24:14 INFO  Using local archive: F:\geniric iq\generiq\nhsbsa_dmd_5.1.0_20260511000001.zip
+13:24:15 INFO  Extracted 8 XML files: f_amp2_3070526.xml, f_ampp2_3070526.xml, f_gtin2_0070526.xml, f_ingredient2_3070526.xml, f_lookup2_3070526.xml, f_vmp2_3070526.xml, f_vmpp2_3070526.xml, f_vtm2_3070526.xml
+13:24:15 INFO  Parsing ingredient substances (f_ingredient2_3070526.xml)...
+13:24:15 INFO    0 ingredient substances
+13:24:15 INFO  Parsing VMPs (f_vmp2_3070526.xml)...
+13:24:16 INFO    23892 valid VMPs, 26830 ingredient links
+13:24:16 INFO  Parsing brand names (f_amp2_3070526.xml)...
+13:24:18 INFO    24506 VMPs have brand-name entries
+13:24:18 INFO  Connecting to database...
+13:24:20 INFO  Existing medicines in DB: 944
+13:25:45 INFO    Batch committed — 500 inserted so far
+13:27:08 INFO    Batch committed — 1000 inserted so far
+13:28:33 INFO    Batch committed — 1500 inserted so far
+13:29:57 INFO    Batch committed — 2000 inserted so far
+13:31:21 INFO    Batch committed — 2500 inserted so far
+13:32:45 INFO    Batch committed — 3000 inserted so far
+13:34:09 INFO    Batch committed — 3500 inserted so far
+13:35:33 INFO    Batch committed — 4000 inserted so far
+13:36:56 INFO    Batch committed — 4500 inserted so far
+13:38:20 INFO    Batch committed — 5000 inserted so far
+13:39:44 INFO    Batch committed — 5500 inserted so far
+13:41:07 INFO    Batch committed — 6000 inserted so far
+13:42:31 INFO    Batch committed — 6500 inserted so far
+13:43:55 INFO    Batch committed — 7000 inserted so far
+13:45:19 INFO    Batch committed — 7500 inserted so far
+13:46:43 INFO    Batch committed — 8000 inserted so far
+13:48:07 INFO    Batch committed — 8500 inserted so far
+13:49:31 INFO    Batch committed — 9000 inserted so far
+13:50:55 INFO    Batch committed — 9500 inserted so far
+13:52:20 INFO    Batch committed — 10000 inserted so far
+14:04:37 INFO  Temp files cleaned up
+14:11:13 INFO  Working directory: C:\Users\yadav\AppData\Local\Temp\dmd_import_buo2ktl2
+14:11:13 INFO  Using local archive: F:\geniric iq\generiq\nhsbsa_dmd_5.1.0_20260511000001.zip
+14:11:13 INFO  Extracted 8 XML files: f_amp2_3070526.xml, f_ampp2_3070526.xml, f_gtin2_0070526.xml, f_ingredient2_3070526.xml, f_lookup2_3070526.xml, f_vmp2_3070526.xml, f_vmpp2_3070526.xml, f_vtm2_3070526.xml
+14:11:13 INFO  Parsing ingredient substances (f_ingredient2_3070526.xml)...
+14:11:13 INFO    0 ingredient substances
+14:11:13 INFO  Parsing VMPs (f_vmp2_3070526.xml)...
+14:11:14 INFO    23892 valid VMPs, 26830 ingredient links
+14:11:14 INFO  Parsing brand names (f_amp2_3070526.xml)...
+14:11:17 INFO    24506 VMPs have brand-name entries
+14:11:17 INFO  Connecting to database...
+14:11:20 INFO  Existing medicines in DB: 10944
+14:11:20 INFO  Records to insert: 13892 (skipping 10000 already in DB)
+14:11:38 INFO    Batch committed — 100 inserted so far
+14:11:56 INFO    Batch committed — 200 inserted so far
+14:12:14 INFO    Batch committed — 300 inserted so far
+14:12:32 INFO    Batch committed — 400 inserted so far
+14:12:50 INFO    Batch committed — 500 inserted so far
+14:13:09 INFO    Batch committed — 600 inserted so far
+14:13:27 INFO    Batch committed — 700 inserted so far
+14:13:46 INFO    Batch committed — 800 inserted so far
+14:14:04 INFO    Batch committed — 900 inserted so far
+14:14:22 INFO    Batch committed — 1000 inserted so far
+14:14:41 INFO    Batch committed — 1100 inserted so far
+14:14:59 INFO    Batch committed — 1200 inserted so far
+14:15:17 INFO    Batch committed — 1300 inserted so far
+14:15:35 INFO    Batch committed — 1400 inserted so far
+14:15:53 INFO    Batch committed — 1500 inserted so far
+14:16:11 INFO    Batch committed — 1600 inserted so far
+14:16:30 INFO    Batch committed — 1700 inserted so far
+14:16:48 INFO    Batch committed — 1800 inserted so far
+14:17:06 INFO    Batch committed — 1900 inserted so far
+14:17:24 INFO    Batch committed — 2000 inserted so far
+14:17:42 INFO    Batch committed — 2100 inserted so far
+14:18:00 INFO    Batch committed — 2200 inserted so far
+14:18:18 INFO    Batch committed — 2300 inserted so far
+14:18:36 INFO    Batch committed — 2400 inserted so far
+14:22:35 WARNING  Connection lost (attempt 1/5): server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+14:22:35 INFO  Waiting 15s then reconnecting...
+14:22:52 INFO  Reconnected. DB has 13344 medicines.
+14:23:10 INFO    Batch committed — 2500 inserted so far
+14:23:27 INFO    Batch committed — 2600 inserted so far
+14:23:45 INFO    Batch committed — 2700 inserted so far
+14:24:02 INFO    Batch committed — 2800 inserted so far
+14:24:20 INFO    Batch committed — 2900 inserted so far
+14:24:37 INFO    Batch committed — 3000 inserted so far
+14:24:55 INFO    Batch committed — 3100 inserted so far
+14:25:12 INFO    Batch committed — 3200 inserted so far
+14:25:30 INFO    Batch committed — 3300 inserted so far
+14:25:47 INFO    Batch committed — 3400 inserted so far
+14:26:05 INFO    Batch committed — 3500 inserted so far
+14:26:23 INFO    Batch committed — 3600 inserted so far
+14:26:40 INFO    Batch committed — 3700 inserted so far
+14:26:58 INFO    Batch committed — 3800 inserted so far
+14:27:15 INFO    Batch committed — 3900 inserted so far
+14:27:32 INFO    Batch committed — 4000 inserted so far
+14:27:50 INFO    Batch committed — 4100 inserted so far
+14:52:24 WARNING  Connection lost (attempt 1/5): server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+14:52:24 INFO  Waiting 15s then reconnecting...
+14:52:41 INFO  Reconnected. DB has 15044 medicines.
+14:52:58 INFO    Batch committed — 4200 inserted so far
+14:53:15 INFO    Batch committed — 4300 inserted so far
+14:53:32 INFO    Batch committed — 4400 inserted so far
+14:53:49 INFO    Batch committed — 4500 inserted so far
+14:54:06 INFO    Batch committed — 4600 inserted so far
+14:54:23 INFO    Batch committed — 4700 inserted so far
+14:54:40 INFO    Batch committed — 4800 inserted so far
+14:54:56 INFO    Batch committed — 4900 inserted so far
+14:55:14 INFO    Batch committed — 5000 inserted so far
+14:55:31 INFO    Batch committed — 5100 inserted so far
+14:55:48 INFO    Batch committed — 5200 inserted so far
+14:56:04 INFO    Batch committed — 5300 inserted so far
+14:56:21 INFO    Batch committed — 5400 inserted so far
+14:56:38 INFO    Batch committed — 5500 inserted so far
+14:56:55 INFO    Batch committed — 5600 inserted so far
+14:57:12 INFO    Batch committed — 5700 inserted so far
+14:57:29 INFO    Batch committed — 5800 inserted so far
+14:57:46 INFO    Batch committed — 5900 inserted so far
+14:58:03 INFO    Batch committed — 6000 inserted so far
+14:58:20 INFO    Batch committed — 6100 inserted so far
+14:58:37 INFO    Batch committed — 6200 inserted so far
+14:58:53 INFO    Batch committed — 6300 inserted so far
+14:59:11 INFO    Batch committed — 6400 inserted so far
+14:59:28 INFO    Batch committed — 6500 inserted so far
+14:59:44 INFO    Batch committed — 6600 inserted so far
+15:00:01 INFO    Batch committed — 6700 inserted so far
+15:00:18 INFO    Batch committed — 6800 inserted so far
+15:00:36 INFO    Batch committed — 6900 inserted so far
+15:00:52 INFO    Batch committed — 7000 inserted so far
+15:01:09 INFO    Batch committed — 7100 inserted so far
+15:01:26 INFO    Batch committed — 7200 inserted so far
+15:01:43 INFO    Batch committed — 7300 inserted so far
+15:02:00 INFO    Batch committed — 7400 inserted so far
+15:02:17 INFO    Batch committed — 7500 inserted so far
+15:02:34 INFO    Batch committed — 7600 inserted so far
+15:02:51 INFO    Batch committed — 7700 inserted so far
+15:03:08 INFO    Batch committed — 7800 inserted so far
+15:03:25 INFO    Batch committed — 7900 inserted so far
+15:03:42 INFO    Batch committed — 8000 inserted so far
+15:03:59 INFO    Batch committed — 8100 inserted so far
+15:04:16 INFO    Batch committed — 8200 inserted so far
+15:04:33 INFO    Batch committed — 8300 inserted so far
+15:04:50 INFO    Batch committed — 8400 inserted so far
+15:05:07 INFO    Batch committed — 8500 inserted so far
+15:05:24 INFO    Batch committed — 8600 inserted so far
+15:05:41 INFO    Batch committed — 8700 inserted so far
+15:05:58 INFO    Batch committed — 8800 inserted so far
+15:06:15 INFO    Batch committed — 8900 inserted so far
+15:06:32 INFO    Batch committed — 9000 inserted so far
+15:06:49 INFO    Batch committed — 9100 inserted so far
+15:07:05 INFO    Batch committed — 9200 inserted so far
+15:07:22 INFO    Batch committed — 9300 inserted so far
+15:07:39 INFO    Batch committed — 9400 inserted so far
+15:07:56 INFO    Batch committed — 9500 inserted so far
+15:08:13 INFO    Batch committed — 9600 inserted so far
+15:08:29 INFO    Batch committed — 9700 inserted so far
+15:08:46 INFO    Batch committed — 9800 inserted so far
+15:09:03 INFO    Batch committed — 9900 inserted so far
+15:09:20 INFO    Batch committed — 10000 inserted so far
+15:09:37 INFO    Batch committed — 10100 inserted so far
+15:09:54 INFO    Batch committed — 10200 inserted so far
+15:10:11 INFO    Batch committed — 10300 inserted so far
+15:10:27 INFO    Batch committed — 10400 inserted so far
+15:10:44 INFO    Batch committed — 10500 inserted so far
+15:11:01 INFO    Batch committed — 10600 inserted so far
+15:11:17 INFO    Batch committed — 10700 inserted so far
+15:11:34 INFO    Batch committed — 10800 inserted so far
+15:11:51 INFO    Batch committed — 10900 inserted so far
+15:12:07 INFO    Batch committed — 11000 inserted so far
+15:12:24 INFO    Batch committed — 11100 inserted so far
+15:12:40 INFO    Batch committed — 11200 inserted so far
+15:12:57 INFO    Batch committed — 11300 inserted so far
+15:13:14 INFO    Batch committed — 11400 inserted so far
+15:13:31 INFO    Batch committed — 11500 inserted so far
+15:13:48 INFO    Batch committed — 11600 inserted so far
+15:14:04 INFO    Batch committed — 11700 inserted so far
+15:14:21 INFO    Batch committed — 11800 inserted so far
+15:14:38 INFO    Batch committed — 11900 inserted so far
+15:14:54 INFO    Batch committed — 12000 inserted so far
+15:15:11 INFO    Batch committed — 12100 inserted so far
+15:15:28 INFO    Batch committed — 12200 inserted so far
+15:15:45 INFO    Batch committed — 12300 inserted so far
+15:16:02 INFO    Batch committed — 12400 inserted so far
+15:16:19 INFO    Batch committed — 12500 inserted so far
+15:16:35 INFO    Batch committed — 12600 inserted so far
+15:16:52 INFO    Batch committed — 12700 inserted so far
+15:17:09 INFO    Batch committed — 12800 inserted so far
+15:17:26 INFO    Batch committed — 12900 inserted so far
+15:17:43 INFO    Batch committed — 13000 inserted so far
+15:18:00 INFO    Batch committed — 13100 inserted so far
+15:18:17 INFO    Batch committed — 13200 inserted so far
+15:18:34 INFO    Batch committed — 13300 inserted so far
+15:18:51 INFO    Batch committed — 13400 inserted so far
+15:19:08 INFO    Batch committed — 13500 inserted so far
+15:19:25 INFO    Batch committed — 13600 inserted so far
+15:19:42 INFO    Batch committed — 13700 inserted so far
+15:19:59 INFO    Batch committed — 13800 inserted so far
+15:20:14 INFO    Batch committed — 13892 inserted so far
+15:20:14 INFO  Import complete — inserted: 13892, skipped (already in DB): 10000
+15:20:14 INFO  Temp files cleaned up

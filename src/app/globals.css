@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Class-based dark mode — applied when .dark is on <html> */
+@variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-brand:       #1D9E75;
+  --color-brand-dark:  #167a5b;
+  --color-brand-light: #e8f7f2;
+  --color-background:  #ffffff;
+  --color-foreground:  #111827;
+  --color-muted:       #6b7280;
+  --color-border:      #e5e7eb;
+  --color-surface:     #ffffff;
+  --color-surface-2:   #f9fafb;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Dark mode — swap all CSS variables */
+html.dark {
+  --color-brand-light: #0c3529;
+  --color-background:  #0f172a;
+  --color-foreground:  #f1f5f9;
+  --color-muted:       #94a3b8;
+  --color-border:      #1e293b;
+  --color-surface:     #1e293b;
+  --color-surface-2:   #0f172a;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe-area padding for bottom nav on notched phones */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

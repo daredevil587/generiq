@@ -1,0 +1,37 @@
+{
+  "name": "generiq",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "scrape": "node scripts/scrapers/run-all-scrapers.mjs",
+    "scrape:hb": "node scripts/scrapers/hb-scraper.mjs",
+    "scrape:awin": "node scripts/scrapers/awin-feed-importer.mjs",
+    "scrape:scheduler": "node scripts/scrapers/scheduler.mjs"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/pg": "^8.20.0",
+    "dotenv": "^17.4.2",
+    "next": "16.2.6",
+    "node-cron": "^4.2.1",
+    "pg": "^8.20.0",
+    "playwright": "^1.60.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
+  }
+}
