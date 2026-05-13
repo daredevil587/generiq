@@ -12,6 +12,7 @@ import PriceTable from "@/components/PriceTable";
 import BackButton from "@/components/BackButton";
 import TrackView from "@/components/TrackView";
 import WatchPrice from "@/components/WatchPrice";
+import NhsEligibilityChecker from "@/components/NhsEligibilityChecker";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/site-url";
 import { slugify } from "@/lib/format-utils";
@@ -300,6 +301,60 @@ export default async function MedicinePage({ params }: Props) {
         <PriceTable prices={prices} medicineName={medicine.name} />
       </div>
 
+      {/* Feature 3 — How to Save More Tips */}
+      {medicine.category === 'medicine' && (
+        <div className="mt-5">
+          {buyOtcIsCheaper && (
+            <div className="flex gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4 mb-3">
+              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C6.5 6.253 2 10.423 2 15.5c0 5.078 4.5 9.247 10 9.247s10-4.169 10-9.247c0-5.077-4.5-9.247-10-9.247z" />
+              </svg>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                <span className="font-semibold">💡 Buy without prescription:</span> {medicine.name} at {formatGBP(retailCheapestVal!)} is cheaper than the NHS prescription charge. No prescription needed.
+              </p>
+            </div>
+          )}
+          {cheaperAlternative && (
+            <div className="flex gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4 mb-3">
+              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C6.5 6.253 2 10.423 2 15.5c0 5.078 4.5 9.247 10 9.247s10-4.169 10-9.247c0-5.077-4.5-9.247-10-9.247z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <span className="font-semibold">💡 Same ingredient, lower price:</span> {cheaperAlternative.name} has the same active ingredient for {formatGBP(String(parseFloat(cheaperAlternative.min_price!)))}.
+                </p>
+                <Link href={`/medicine/${cheaperAlternative.id}`} className="text-xs font-semibold text-amber-700 dark:text-amber-300 hover:underline mt-1 inline-block">
+                  Compare →
+                </Link>
+              </div>
+            </div>
+          )}
+          {retailCheapestVal !== null && retailCheapestVal > 20 && (
+            <div className="flex gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4 mb-3">
+              <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C6.5 6.253 2 10.423 2 15.5c0 5.078 4.5 9.247 10 9.247s10-4.169 10-9.247c0-5.077-4.5-9.247-10-9.247z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <span className="font-semibold">💡 Take multiple medicines?</span> A Prescription Prepayment Certificate (PPC) at {formatGBP(String(PPC_ANNUAL))}/year covers all your prescriptions with no per-item charge.
+                </p>
+                <a href="https://www.nhsbsa.nhs.uk/help-nhs-prescription-costs/prescription-prepayment-certificates-ppcs" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-amber-700 dark:text-amber-300 hover:underline mt-1 inline-block">
+                  Learn about PPC →
+                </a>
+              </div>
+            </div>
+          )}
+          <div className="flex gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4">
+            <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C6.5 6.253 2 10.423 2 15.5c0 5.078 4.5 9.247 10 9.247s10-4.169 10-9.247c0-5.077-4.5-9.247-10-9.247z" />
+            </svg>
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              <span className="font-semibold">💡 Repeat prescriptions:</span> Ask your GP to set up online repeat prescription ordering to avoid repeat trips to the pharmacy.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* D — Annual savings calculator (medicines only — not supplements/skincare) */}
       {retailCheapestVal !== null && medicine.category === 'medicine' && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6 mt-5">
@@ -353,6 +408,15 @@ export default async function MedicinePage({ params }: Props) {
             </a>
           </p>
         </div>
+      )}
+
+      {/* Feature 2 — NHS Eligibility Calculator */}
+      {medicine.category === 'medicine' && (
+        <NhsEligibilityChecker
+          medicineId={medicine.id}
+          medicineName={medicine.name}
+          retailPrice={retailCheapestVal}
+        />
       )}
 
       {/* Generic alternatives */}
