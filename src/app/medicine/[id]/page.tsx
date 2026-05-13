@@ -132,6 +132,21 @@ export default async function MedicinePage({ params }: Props) {
   // Retail min price (for TrackView and WatchPrice)
   const retailMinPrice = retailPrices[0]?.price_gbp ?? null;
 
+  // NHS prescription charge and PPC constants
+  const NHS_RX_CHARGE = 9.90;
+  const PPC_ANNUAL    = 111.60;
+
+  // ── Feature E: cheaper alternative with same ingredient ──────────────────
+  const retailCheapestVal = retailPrices[0] ? parseFloat(retailPrices[0].price_gbp) : null;
+  const cheaperAlternative = alternatives.find(
+    alt => alt.min_price !== null && parseFloat(alt.min_price) < (retailCheapestVal ?? Infinity)
+  ) ?? null;
+
+  // ── Feature D: annual savings calculator ─────────────────────────────────
+  const rxSavingPerItem  = retailCheapestVal !== null ? retailCheapestVal - NHS_RX_CHARGE : null;
+  const otcSavingPerItem = retailCheapestVal !== null ? NHS_RX_CHARGE - retailCheapestVal : null;
+  const buyOtcIsCheaper  = retailCheapestVal !== null && retailCheapestVal < NHS_RX_CHARGE;
+
   return (
     <>
     <script
@@ -189,8 +204,12 @@ export default async function MedicinePage({ params }: Props) {
           </div>
         </div>
 
+        {/* B — What is this used for */}
         {medicine.description && (
-          <p className="mt-4 text-[var(--color-muted)] text-sm leading-relaxed">{medicine.description}</p>
+          <div className="mt-4 rounded-xl bg-[var(--color-surface-2)] border border-[var(--color-border)] px-4 py-3">
+            <p className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide mb-1">What is this used for?</p>
+            <p className="text-sm text-[var(--color-foreground)] leading-relaxed">{medicine.description}</p>
+          </div>
         )}
 
         {medicine.dosage_form && (
@@ -245,6 +264,31 @@ export default async function MedicinePage({ params }: Props) {
         </div>
       </div>
 
+      {/* E — Same ingredient, lower price banner */}
+      {cheaperAlternative && (
+        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-2xl px-5 py-4 mb-5">
+          <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-green-800 dark:text-green-300">
+              Same ingredient available for {formatGBP(String(parseFloat(cheaperAlternative.min_price!) ))} less
+            </p>
+            <p className="text-xs text-green-700 dark:text-green-400 mt-0.5 truncate">
+              {cheaperAlternative.name} — same active ingredient, lower price
+            </p>
+          </div>
+          <Link
+            href={`/medicine/${cheaperAlternative.id}`}
+            className="shrink-0 text-xs font-semibold text-green-700 dark:text-green-400 hover:underline"
+          >
+            View →
+          </Link>
+        </div>
+      )}
+
       {/* Price comparison */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6">
         <h2 className="font-bold text-[var(--color-foreground)] text-lg mb-5 flex items-center gap-2">
@@ -255,6 +299,61 @@ export default async function MedicinePage({ params }: Props) {
         </h2>
         <PriceTable prices={prices} medicineName={medicine.name} />
       </div>
+
+      {/* D — Annual savings calculator (medicines only — not supplements/skincare) */}
+      {retailCheapestVal !== null && medicine.category === 'medicine' && (
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6 mt-5">
+          <h2 className="font-bold text-[var(--color-foreground)] text-base mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-[var(--color-brand)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            How much could you save per year?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            {/* Per prescription */}
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-center">
+              <p className="text-xs text-[var(--color-muted)] mb-1">Per prescription</p>
+              <p className="text-2xl font-extrabold tabular-nums text-[var(--color-brand)]">
+                {buyOtcIsCheaper ? formatGBP(otcSavingPerItem!) : `£${NHS_RX_CHARGE.toFixed(2)}`}
+              </p>
+              <p className="text-xs text-[var(--color-muted)] mt-1">
+                {buyOtcIsCheaper ? "saved buying OTC" : "NHS charge per item"}
+              </p>
+            </div>
+            {/* 12 per year */}
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-center">
+              <p className="text-xs text-[var(--color-muted)] mb-1">12 prescriptions/year</p>
+              <p className="text-2xl font-extrabold tabular-nums text-[var(--color-brand)]">
+                {buyOtcIsCheaper
+                  ? formatGBP(otcSavingPerItem! * 12)
+                  : formatGBP(NHS_RX_CHARGE * 12)}
+              </p>
+              <p className="text-xs text-[var(--color-muted)] mt-1">
+                {buyOtcIsCheaper ? "annual OTC saving" : "annual prescription cost"}
+              </p>
+            </div>
+            {/* PPC comparison */}
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 text-center">
+              <p className="text-xs text-[var(--color-muted)] mb-1">With annual PPC</p>
+              <p className="text-2xl font-extrabold tabular-nums text-[var(--color-brand)]">
+                {formatGBP(PPC_ANNUAL)}
+              </p>
+              <p className="text-xs text-[var(--color-muted)] mt-1">covers unlimited items</p>
+            </div>
+          </div>
+          <p className="text-xs text-[var(--color-muted)] leading-relaxed">
+            {buyOtcIsCheaper
+              ? `Buying ${medicine.name} over the counter at ${formatGBP(retailCheapestVal)} is cheaper than the £${NHS_RX_CHARGE.toFixed(2)} NHS prescription charge. No prescription needed.`
+              : `If you take multiple medicines, a Prescription Prepayment Certificate (PPC) at ${formatGBP(PPC_ANNUAL)}/year covers all your prescriptions with no per-item charge.`}
+            {" "}
+            <a href="https://www.nhsbsa.nhs.uk/help-nhs-prescription-costs/prescription-prepayment-certificates-ppcs"
+              target="_blank" rel="noopener noreferrer"
+              className="text-[var(--color-brand)] font-medium hover:underline">
+              Learn about PPC →
+            </a>
+          </p>
+        </div>
+      )}
 
       {/* Generic alternatives */}
       {alternatives.length > 0 && (

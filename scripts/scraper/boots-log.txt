@@ -1,0 +1,67 @@
+
+=== Boots Scraper ===
+
+DB products loaded: 5990 supplements, 5280 skincare
+
+Category: skin-care/face/face-moisturisers [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/face/face-serums [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/face/face-cleansers [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/face/face-toners-mists [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/face/eye-creams-gels [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/face/face-masks [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/sun-care [skincare]
+  page 1... 0 products (empty)
+
+Category: skin-care/body/body-moisturisers [skincare]
+  page 1... 0 products (empty)
+
+Category: hair/shampoo [skincare]
+  page 1... 0 products (empty)
+
+Category: hair/conditioner [skincare]
+  page 1... 0 products (empty)
+
+Category: vitamins-and-supplements/vitamins [supplement]
+  page 1... 0 products (empty)
+
+Category: vitamins-and-supplements/minerals [supplement]
+  page 1... 0 products (empty)
+
+Category: vitamins-and-supplements/fish-oils-omegas [supplement]
+  page 1... 0 products (empty)
+
+Category: vitamins-and-supplements/probiotics [supplement]
+  page 1... 0 products (empty)
+
+Category: vitamins-and-supplements/herbal-supplements [supplement]
+  page 1... 0 products (empty)
+
+── Results ──
+  Scraped:   0
+  Matched:   0
+  Updated:   0
+  Unmatched: 0
+
+Done!
+plements/herbal-supplements [supplement]
+  page 1... 0 products (empty)
+
+── Results ──
+  Scraped:   0
+  Matched:   0
+  Updated:   0
+  Unmatched: 0
+
+Done!

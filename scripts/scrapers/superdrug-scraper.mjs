@@ -5,10 +5,9 @@
  * Usage: node scripts/scrapers/superdrug-scraper.mjs
  */
 
-import { chromium } from 'playwright';
 import {
-  pool, loadDbProducts, findBestMatch, upsertPrice, sleep, randDelay,
-  BROWSER_ARGS, PAGE_HEADERS,
+  pool, loadDbProducts, findBestMatch, upsertPrice, upsertMedicine, sleep, randDelay,
+  launchStealthBrowser, PAGE_HEADERS,
 } from './scraper-utils.mjs';
 
 const PHARMACY_NAME = 'Superdrug';
@@ -61,12 +60,14 @@ async function scrapeSuperdrugPage(page, url) {
         const linkEl  = card.querySelector('a[href*="/p-"], a[href*="/superdrug.com/"]');
         const sizeEl  = card.querySelector('[class*="ProductSize"], [class*="product-size"], [class*="variant"]');
 
+        const imgEl   = card.querySelector('img');
         const name  = nameEl?.textContent?.trim();
         const price = priceEl?.textContent?.trim();
         const href  = linkEl?.getAttribute('href') ?? card.querySelector('a')?.getAttribute('href');
         const size  = sizeEl?.textContent?.trim() ?? null;
+        const image = imgEl?.src || imgEl?.dataset?.src || null;
 
-        if (name && price && href) results.push({ name, priceRaw: price, href, size });
+        if (name && price && href) results.push({ name, priceRaw: price, href, size, image });
       });
 
       return results;
@@ -82,7 +83,7 @@ async function scrapeSuperdrugPage(page, url) {
         ? r.href
         : `https://www.superdrug.com${r.href}`;
 
-      products.push({ name: r.name, price, url: productUrl, size: r.size });
+      products.push({ name: r.name, price, url: productUrl, size: r.size, image: r.image });
     }
   } catch (err) {
     process.stderr.write(`  [page error: ${err.message}]\n`);
@@ -109,7 +110,7 @@ async function main() {
   const dbProducts = await loadDbProducts(['skincare', 'supplement']);
   console.log(`DB products loaded: ${dbProducts.length.toLocaleString()}`);
 
-  const browser = await chromium.launch(BROWSER_ARGS);
+  const browser = await launchStealthBrowser();
   const context = await browser.newContext({
     extraHTTPHeaders: PAGE_HEADERS,
     viewport: { width: 1280, height: 800 },
@@ -140,21 +141,28 @@ async function main() {
       let pageMatched = 0;
 
       for (const prod of products) {
-        const match = findBestMatch(prod.name, dbProducts);
-        if (!match) {
+        let match = findBestMatch(prod.name, dbProducts);
+        let medicineId;
+
+        if (match) {
+          medicineId = match.product.id;
+          stats.matched++;
+        } else {
+          medicineId = await upsertMedicine({ name: prod.name, category: 'skincare', source: SOURCE });
+          if (!medicineId) { stats.unmatched++; continue; }
+          dbProducts.push({ id: medicineId, name: prod.name, category: 'skincare', norm: prod.name.toLowerCase() });
           stats.unmatched++;
-          unmatchedNames.push(prod.name);
-          continue;
         }
-        stats.matched++;
+
         pageMatched++;
         try {
           await upsertPrice({
-            medicineId:   match.product.id,
+            medicineId,
             pharmacyName: PHARMACY_NAME,
             pharmacyUrl:  prod.url,
             priceGbp:     prod.price,
             packSize:     prod.size,
+            imageUrl:     prod.image,
             source:       SOURCE,
           });
           stats.updated++;

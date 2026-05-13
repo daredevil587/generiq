@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import type { PriceRow } from "@/lib/medicines-dal";
 import { formatGBP, pricePerUnit } from "@/lib/format-utils";
 import { NHS_RX_CHARGE, PPC_ANNUAL, PPC_3MONTH } from "@/lib/config";
@@ -9,6 +10,22 @@ interface Props {
   prices: PriceRow[];
   medicineName?: string;
 }
+
+// Pharmacies with known student / NHS discounts
+const STUDENT_DISCOUNTS: Record<string, { label: string; url: string }> = {
+  "Superdrug": {
+    label: "10% student discount",
+    url:   "https://www.superdrug.com/student-discount",
+  },
+  "Boots": {
+    label: "NHS & student offers",
+    url:   "https://www.boots.com/offers/student-discount",
+  },
+  "Holland & Barrett": {
+    label: "Student discount available",
+    url:   "https://www.hollandandbarrett.com/info/student-discount/",
+  },
+};
 
 const PHARMACY_COLORS: Record<string, string> = {
   "Pharmacy2U":      "bg-blue-600",
@@ -26,6 +43,7 @@ function pharmacyInitials(name: string) {
 
 export default function PriceTable({ prices, medicineName }: Props) {
   const [nhsExpanded, setNhsExpanded] = useState(false);
+  const [expandedId, setExpandedId]   = useState<number | null>(null);
 
   const nhsPrices = useMemo(
     () => [...prices.filter(p => p.source === "nhs_drug_tariff")]
@@ -90,7 +108,20 @@ export default function PriceTable({ prices, medicineName }: Props) {
           {/* Cheapest option — prominent */}
           <div className="bg-[var(--color-brand)] px-5 py-5 sm:py-6">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              {/* Product image — shown if scraped */}
+              {retailPrices[0].image_url && (
+                <Image
+                  src={retailPrices[0].image_url}
+                  alt={retailPrices[0].pharmacy_name}
+                  width={96}
+                  height={96}
+                  priority
+                  unoptimized
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl bg-white/10 border border-white/20 shrink-0"
+                  onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-white/70 uppercase tracking-widest mb-1">Cheapest option</p>
                 <p className="text-xl sm:text-2xl font-bold text-white leading-tight">
                   {retailPrices[0].pharmacy_name}
@@ -98,8 +129,13 @@ export default function PriceTable({ prices, medicineName }: Props) {
                 {retailPrices[0].pack_size && (
                   <p className="text-sm text-white/70 mt-0.5">{[retailPrices[0].strength, retailPrices[0].pack_size].filter(Boolean).join(" · ")}</p>
                 )}
+                {retailPrices[0].offer_text && (
+                  <span className="inline-block mt-1.5 text-[10px] bg-amber-400/30 text-amber-100 font-semibold px-2 py-0.5 rounded-full">
+                    {retailPrices[0].offer_text}
+                  </span>
+                )}
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <p className="text-3xl sm:text-4xl font-extrabold text-white tabular-nums leading-none">
                   {formatGBP(retailPrices[0].price_gbp)}
                 </p>
@@ -285,61 +321,126 @@ export default function PriceTable({ prices, medicineName }: Props) {
               const priceVal   = parseFloat(p.price_gbp);
               const diff       = retailCheapestVal !== null ? priceVal - retailCheapestVal : 0;
               const colorCls   = PHARMACY_COLORS[p.pharmacy_name] ?? "bg-gray-400";
+              const isExpanded = expandedId === p.id;
 
               return (
-                <div key={p.id} className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${isCheapest ? "bg-[var(--color-brand-light)]" : "hover:bg-[var(--color-surface-2)]"}`}>
-                  {/* Logo avatar */}
-                  <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg text-white text-xs font-bold shrink-0 ${colorCls}`}>
-                    {pharmacyInitials(p.pharmacy_name)}
-                  </span>
-
-                  {/* Name */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-[var(--color-foreground)] truncate">{p.pharmacy_name}</p>
-                    {(p.strength || p.pack_size) && (
-                      <p className="text-xs text-[var(--color-muted)] truncate">{[p.strength, p.pack_size].filter(Boolean).join(" · ")}</p>
-                    )}
-                    {isCheapest && <span className="text-xs text-[var(--color-brand)] font-semibold">Cheapest</span>}
-                  </div>
-
-                  {/* Stock — visible on all screens */}
-                  <div>
-                    {p.in_stock ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-                        <span className="hidden sm:inline">In stock</span>
-                      </span>
-                    ) : (
-                      <span className="text-xs text-[var(--color-muted)] whitespace-nowrap hidden sm:inline">Out of stock</span>
-                    )}
-                  </div>
-
-                  {/* Price + per-unit */}
-                  <div className="text-right shrink-0">
-                    <p className={`font-bold tabular-nums ${isCheapest ? "text-[var(--color-brand)] text-lg" : "text-[var(--color-foreground)]"}`}>
-                      {formatGBP(p.price_gbp)}
-                      {diff > 0.005 && (
-                        <span className="ml-1 text-xs font-normal text-[var(--color-muted)]">+{formatGBP(diff)}</span>
-                      )}
-                    </p>
-                    {pricePerUnit(p.price_gbp, p.pack_size) && (
-                      <p className="text-xs text-[var(--color-muted)] tabular-nums">{pricePerUnit(p.price_gbp, p.pack_size)}</p>
-                    )}
-                  </div>
-
-                  <a
-                    href={`/go/${p.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer sponsored"
-                    onClick={e => e.stopPropagation()}
-                    className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                      isCheapest
-                        ? "bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-dark)]"
-                        : "border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                <div key={p.id}>
+                  {/* ── Main row — click to expand image ── */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setExpandedId(isExpanded ? null : p.id)}
+                    onKeyDown={e => e.key === "Enter" && setExpandedId(isExpanded ? null : p.id)}
+                    className={`flex items-center gap-3 px-4 py-3.5 transition-colors cursor-pointer select-none ${
+                      isCheapest ? "bg-[var(--color-brand-light)]" : "hover:bg-[var(--color-surface-2)]"
                     }`}
                   >
-                    Buy
-                  </a>
+                    {/* Logo avatar */}
+                    <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg text-white text-xs font-bold shrink-0 ${colorCls}`}>
+                      {pharmacyInitials(p.pharmacy_name)}
+                    </span>
+
+                    {/* Name + badges */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-[var(--color-foreground)] truncate">{p.pharmacy_name}</p>
+                      {(p.strength || p.pack_size) && (
+                        <p className="text-xs text-[var(--color-muted)] truncate">{[p.strength, p.pack_size].filter(Boolean).join(" · ")}</p>
+                      )}
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {isCheapest && (
+                          <span className="text-xs text-[var(--color-brand)] font-semibold">Cheapest</span>
+                        )}
+                        {p.offer_text && (
+                          <span className="text-[10px] bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded-full">
+                            {p.offer_text}
+                          </span>
+                        )}
+                        {STUDENT_DISCOUNTS[p.pharmacy_name] && (
+                          <a
+                            href={STUDENT_DISCOUNTS[p.pharmacy_name].url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="text-[10px] bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 font-semibold px-1.5 py-0.5 rounded-full hover:opacity-80 transition-opacity"
+                          >
+                            🎓 {STUDENT_DISCOUNTS[p.pharmacy_name].label}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Stock */}
+                    <div>
+                      {p.in_stock ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                          <span className="hidden sm:inline">In stock</span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-[var(--color-muted)] whitespace-nowrap hidden sm:inline">Out of stock</span>
+                      )}
+                    </div>
+
+                    {/* Price + per-unit */}
+                    <div className="text-right shrink-0">
+                      <p className={`font-bold tabular-nums ${isCheapest ? "text-[var(--color-brand)] text-lg" : "text-[var(--color-foreground)]"}`}>
+                        {formatGBP(p.price_gbp)}
+                        {diff > 0.005 && (
+                          <span className="ml-1 text-xs font-normal text-[var(--color-muted)]">+{formatGBP(diff)}</span>
+                        )}
+                      </p>
+                      {pricePerUnit(p.price_gbp, p.pack_size) && (
+                        <p className="text-xs text-[var(--color-muted)] tabular-nums">{pricePerUnit(p.price_gbp, p.pack_size)}</p>
+                      )}
+                    </div>
+
+                    {/* Expand chevron */}
+                    <svg
+                      className={`w-4 h-4 text-[var(--color-muted)] shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+
+                  {/* ── Expanded panel — product image + buy button ── */}
+                  {isExpanded && (
+                    <div className="flex items-center gap-4 px-4 py-4 bg-[var(--color-surface-2)] border-t border-[var(--color-border)]">
+                      {p.image_url ? (
+                        <Image
+                          src={p.image_url}
+                          alt={`${p.pharmacy_name} product`}
+                          width={96}
+                          height={96}
+                          unoptimized
+                          className="w-24 h-24 object-contain rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shrink-0"
+                          onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                      ) : (
+                        <div className="w-24 h-24 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-center shrink-0">
+                          <svg className="w-8 h-8 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h.01M15 12h.01M12 12h.01M3 12c0 4.97 4.03 9 9 9s9-4.03 9-9-4.03-9-9-9-9 4.03-9 9z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-[var(--color-foreground)]">{p.pharmacy_name}</p>
+                        <p className="text-2xl font-extrabold text-[var(--color-brand)] tabular-nums mt-0.5">{formatGBP(p.price_gbp)}</p>
+                        {p.offer_text && (
+                          <p className="text-xs text-amber-700 dark:text-amber-400 font-semibold mt-1">{p.offer_text}</p>
+                        )}
+                      </div>
+                      <a
+                        href={`/go/${p.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer sponsored"
+                        onClick={e => e.stopPropagation()}
+                        className="shrink-0 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold px-4 py-2.5 rounded-xl transition-colors text-sm"
+                      >
+                        Buy now →
+                      </a>
+                    </div>
+                  )}
                 </div>
               );
             })}

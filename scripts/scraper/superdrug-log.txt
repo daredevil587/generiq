@@ -1,0 +1,54 @@
+
+=== Superdrug Scraper ===
+
+DB products loaded: 11,270
+
+Category: skin/face/face-moisturisers
+  page 1... 0 products (empty)
+
+Category: skin/face/face-serums
+  page 1... 0 products (empty)
+
+Category: skin/face/face-cleansers
+  page 1... 0 products (empty)
+
+Category: skin/face/face-toners
+  page 1... 0 products (empty)
+
+Category: skin/face/eye-treatments
+  page 1... 0 products (empty)
+
+Category: skin/face/face-masks
+  page 1... 0 products (empty)
+
+Category: skin/sun-care
+  page 1... 0 products (empty)
+
+Category: skin/body/body-lotion
+  page 1... 0 products (empty)
+
+Category: hair/shampoo
+  page 1... 0 products (empty)
+
+Category: hair/conditioner
+  page 1... 0 products (empty)
+
+Category: make-up/face/foundation
+  page 1... 0 products (empty)
+
+Category: make-up/eyes/mascara
+  page 1... 0 products (empty)
+
+Category: make-up/lips/lipstick
+  page 1... 0 products (empty)
+
+Category: health-pharmacy/vitamins-supplements
+  page 1... 0 products (empty)
+
+── Results ──
+  Scraped:   0
+  Matched:   0
+  Updated:   0
+  Unmatched: 0
+
+Done!

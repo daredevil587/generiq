@@ -5,10 +5,9 @@
  * Usage: node scripts/scrapers/boots-scraper.mjs
  */
 
-import { chromium } from 'playwright';
 import {
-  pool, loadDbProducts, findBestMatch, upsertPrice, sleep, randDelay,
-  BROWSER_ARGS, PAGE_HEADERS,
+  pool, loadDbProducts, findBestMatch, upsertPrice, upsertMedicine, sleep, randDelay,
+  launchStealthBrowser, PAGE_HEADERS,
 } from './scraper-utils.mjs';
 
 const PHARMACY_NAME = 'Boots';
@@ -64,13 +63,15 @@ async function scrapeBootsPage(page, url) {
         const priceEl = card.querySelector('[class*="product-price"]:not([class*="was"]), [class*="ProductPrice"]:not([class*="was"]), [data-test="product-price"]');
         const linkEl  = card.querySelector('a[href*="/boots.com/"], a[href^="/"]');
         const sizeEl  = card.querySelector('[class*="product-size"], [class*="ProductSize"]');
+        const imgEl   = card.querySelector('img');
 
         const name  = nameEl?.textContent?.trim();
         const price = priceEl?.textContent?.trim();
         const href  = linkEl?.getAttribute('href');
         const size  = sizeEl?.textContent?.trim() ?? null;
+        const image = imgEl?.src || imgEl?.dataset?.src || null;
 
-        if (name && price && href) results.push({ name, priceRaw: price, href, size });
+        if (name && price && href) results.push({ name, priceRaw: price, href, size, image });
       });
 
       return results;
@@ -114,7 +115,7 @@ async function main() {
   ]);
   console.log(`DB products loaded: ${suppProducts.length} supplements, ${skinProducts.length} skincare`);
 
-  const browser = await chromium.launch(BROWSER_ARGS);
+  const browser = await launchStealthBrowser();
   const context = await browser.newContext({
     extraHTTPHeaders: PAGE_HEADERS,
     viewport: { width: 1280, height: 800 },
@@ -146,21 +147,30 @@ async function main() {
       let pageMatched = 0;
 
       for (const prod of products) {
-        const match = findBestMatch(prod.name, dbProducts);
-        if (!match) {
-          stats.unmatched++;
-          unmatchedNames.push(prod.name);
-          continue;
+        let match = findBestMatch(prod.name, dbProducts);
+        let medicineId;
+
+        if (match) {
+          medicineId = match.product.id;
+          stats.matched++;
+        } else {
+          // No match — create a new medicine entry for this UK product
+          medicineId = await upsertMedicine({ name: prod.name, category: seed.cat, source: SOURCE });
+          if (!medicineId) { stats.unmatched++; continue; }
+          // Add to local cache so duplicates on later pages hit the match path
+          dbProducts.push({ id: medicineId, name: prod.name, category: seed.cat, norm: prod.name.toLowerCase() });
+          stats.unmatched++; // count as "new" rather than fuzzy-matched
         }
-        stats.matched++;
+
         pageMatched++;
         try {
           await upsertPrice({
-            medicineId:   match.product.id,
+            medicineId,
             pharmacyName: PHARMACY_NAME,
             pharmacyUrl:  prod.url,
             priceGbp:     prod.price,
             packSize:     prod.size,
+            imageUrl:     prod.image,
             source:       SOURCE,
           });
           stats.updated++;

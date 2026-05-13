@@ -34,6 +34,8 @@ export interface PriceRow {
   strength: string | null;
   last_updated: Date;
   source: string | null;
+  offer_text: string | null;
+  image_url: string | null;
 }
 
 export interface IngredientRow {

@@ -1,0 +1,212 @@
+◇ injected env (1) from .env.local // tip: ⌘ enable debugging { debug: true }
+
+🔍 GeneriQ Scraper — 2026-05-13T01:16:41.306Z
+   Limit: 200 medicines | Pharmacies: Boots, Superdrug, Holland & Barrett | Category: skincare
+
+   Found 200 medicines without retail prices
+
+[1/200] 1881 Black                                         
+[2/200] 1ère Crème Minérale SPF 50+                        
+[3/200] 1er Shampoing Extra Doux                           
+[4/200] 1 Masque Anti-Rides Bio-Cellulose                  
+[5/200] 1 Million Eau de Toilette 100 ml                   
+[6/200] 1-Minute-Thermomaske Aktivkohle!                   
+[7/200] 238 Rose Candy                                     
+[8/200] 24h hand protection balm                           
+[9/200] 24h hand protection balm kiwi dark chocolate       
+[10/200] 24K HOLD PROGRESS ACEITE SECO                      
+[11/200] 25 lingettes démaquillantes fraîcheur              
+[12/200] 2 en 1 hydra balance                               
+[13/200] 2 en 1 Lait lotion                                 
+[14/200] 2 in 1 Citrus fresh                                
+[15/200] 2 in 1 Classic                                     
+[16/200] 2 in 1 Cleanser + Toner                            
+[17/200] 2 in 1 Dusche Lemongras Guarana                    
+[18/200] 2 in 1 festes Shampoo + Conditioner                
+[19/200] 2in1 primer daily UV serum SPF 50+                 
+[20/200] 2in1 Shampoo and Conditioner Bar                   
+[21/200] 2in1 Shampoo & Conditioner Despicable Me           
+[22/200] 2in1 Volumen Shampoo & Spülung Malve & Acai        
+[23/200] 2 in 1 - Zahncreme + Mundspülung - Original        
+[24/200] 2 savonettes extra douces Pivoine                  
+[25/200] 3 337875522786&quot;                               
+[26/200] 3 Agrumes                                          
+[27/200] 3D White Fluoride Toothpaste                       
+[28/200] 3 in 1 Duschgel                                    
+[29/200] 3in1 Duschgel (Projekt Zuhause, mit Bambus-Extrakt 
+[30/200] 3in1 Shower, Shampoo & Comditioner                 
+[31/200] 3in1 shower, Shampoo & conditioner                 
+[32/200] 3 in 1 Sport Duschgel                              
+[33/200] 3 Savons de Marseille                                Holland & Barrett: £19.99 [img] [3 for 2]
+[34/200] 3 triple protection menthe fraîche                 
+[35/200] 40 Sport Mineral Suncreen                          
+[36/200] 48H Day Control Protection                         
+[37/200] 48H Deodorant Body Spray Push the Heat             
+[38/200] 48 HRS NON STOP FRESH                              
+[39/200] 4 بني                                              
+[40/200] 50 Hoch Sonnenmilch                                
+[41/200] 50 SPF Sunspray                                    
+[42/200] 50+ Sport                                          
+[43/200] 5in1 zahn-creme                                    
+[44/200] 5 protection                                       
+[45/200] 5 protections efficacité intégrale 48h             
+[46/200] 5% UREA - DUSCHE+SHAMPOO                           
+[47/200] 6in1 Trockenshampoo                                
+[48/200] 72% Extra Pur à l'Huile d'Olive                    
+[49/200] 7 Kräuter Shampoo                                  
+[50/200] 7-Kräuter Shampoo                                  
+[51/200] 8901030899768&gt;                                  
+[52/200] Absolut Repair                                     
+[53/200] Accord chic Secrets d'essences Eau de parfum       
+[54/200] Accord Parfait 2.R. Vanille Rosé - Fond de teint f 
+[55/200] Accord Parfait fond de teint unifiant sur-mesure L 
+[56/200] Aceite de almendras                                  Holland & Barrett: £19.99 [img] [3 for 2]
+[57/200] Acne cream                                         
+[58/200] AcneSol SPF50+ comfort sunscreen                   
+[59/200] Acondicionador                                     
+[60/200] Acqua micellare tutto in 1                         
+[61/200] Actigro Serum acticroissance                       
+[62/200] Action Body Wash                                   
+[63/200] Action sensibilité                                 
+[64/200] Activated Charcoal toothpaste                      
+[65/200] Active Botanical Eye Contour (15ml)                
+[66/200] Active Clean                                       
+[67/200] Active Clean Gel douche Charbon Actif              
+[68/200] Active Energy Hydro Gesichtsgel                    
+[69/200] Active Fresh                                       
+[70/200] Active nature men deo Zerstäuber                   
+[71/200] ACTIVE PROTECT                                     
+[72/200] Active & Pure Deodorant                            
+[73/200] Active Start Body hair face revitalising           
+[7
+[74/200] 2 in 1 Citrus fresh                             
+[7
+[75/200] 2 in 1 Classic                                  
+[7
+[76/200] 2 in 1 Cleanser + Toner                            
+[77/200] 2 in 1 Dusche Lemongras Guarana                    
+[78/200] 2 in 1 festes Shampoo + Conditioner                
+[79/200] 2in1 primer daily UV serum SPF 50+                 
+[80/200] 2in1 Shampoo and Conditioner Bar                   
+[81/200] 2in1 Shampoo & Conditioner Despicable Me           
+[82/200] 2in1 Volumen Shampoo & Spülung Malve & Acai        
+[83/200] 2 in 1 - Zahncreme + Mundspülung - Original        
+[84/200] 2% Reduced Fat ultra-filtered milk                 
+[85/200] 2 savonettes extra douces Pivoine                  
+[86/200] 30g protein shake milk protein shake chocolate fud 
+[87/200] 30% Protein Bars Chocolate                         
+[88/200] 30% protein bars stracciatella flavour with chocol 
+[89/200] 30% Protein Plus                                     Holland & Barrett: £16.29 [img] [3 for 2]
+[90/200] 30% protein sabor vainilla                         
+[91/200] 32g Plant Protein 0g Sugar Chocolate               
+[92/200] 32g Plant Protein No Nut Butter Cup                
+[93/200] 3 337875522786&quot;                               
+[94/200] 3 Agrumes                                          
+[95/200] 3D White Fluoride Toothpaste                       
+[96/200] 3 in 1 Duschgel                                    
+[97/200] 3in1 Duschgel (Projekt Zuhause, mit Bambus-Extrakt 
+[98/200] 3in1 Shower, Shampoo & Comditioner                 
+[99/200] 3in1 shower, Shampoo & conditioner                 
+[100/200] 3 in 1 Sport Duschgel                              
+[101/200] 3K Protein Vanille-Geschmack                       
+[102/200] 3 pack protein bar                                 
+[103/200] 3 Savons de Marseille                                Holland & Barrett: £19.99 [img] [3 for 2]
+[104/200] 3 triple protection menthe fraîche                 
+[105/200] 3 Vegan Protein                                    
+[106/200] 3 Крънч                                            
+[107/200] 400G FAST HYDRATATANTE ORANGE ISOSTAR              
+[108/200] 40% PROTEIN caramel peanut butter                  
+[109/200] 40% Protein + Crisp Choco Coco flavour             
+[110/200] 40% protein crunchy bar                            
+[111/200] 40 Sport Mineral Suncreen                          
+[112/200] 48H Day Control Protection                         
+[113/200] 48H Deodorant Body Spray Push the Heat             
+[114/200] 48 HRS NON STOP FRESH                              
+[115/200] 4900115 เอนเนอร์จี้                                
+[116/200] 4-in-1 Fiber                                       
+[117/200] 4-in-1 Fiber Psyllium Fiber Supplement             
+[118/200] 4 بني                                              
+[119/200] 50 Hoch Sonnenmilch                                
+[120/200] 50% protein bar                                    
+[121/200] 50% Protein Riegel Zitrone-Joghurt                 
+[122/200] 50 SPF Sunspray                                    
+[123/200] 50+ Sport                                          
+[124/200] 52% Protein+                                       
+[125/200] 5-Aminolevulinic acid 78mg/g gel                   
+[126/200] 5-Aminolevulinic acid 8mg medicated plasters       
+[127/200] 5-aminolevulinic Acid Hydrochloride                
+[128/200] 5 Hour energy berry regular strength single        
+[129/200] 5-HTP                                              
+[130/200] 5in1 zahn-creme                                    
+[131/200] 5-Methoxypsoralen 20mg tablets                     
+[132/200] 5 protection                                       
+[133/200] 5 protections efficacité intégrale 48h             
+[134/200] 5% UREA - DUSCHE+SHAMPOO                           
+[135/200] 5 Zero Electrolyte Sports Drink Citrus Flavour     
+[136/200] 60% Protein Bar                                      Holland & Barrett: £20.59 [img] [3 for 2]
+[137/200] 60% Protein Salted Peanut-caramel                  
+[138/200] 6in1 Trockenshampoo                                
+[139/200] 6 Magnésium En 1 - 60 Comprimés - MBE              
+[140/200] 6 X Beavita Måltidsersättning, Choklad, Pulver, 6  
+[141/200] 72% Extra Pur à l'Huile d'Olive                    
+[142/200] 7g BCAA Muscle Recovery + Electrolytes Blue Raspbe 
+[143/200] 7 Kräuter Shampoo                                  
+[144/200] 7-Kräuter Shampoo                                  
+[145/200] 8901030899768&gt;                                  
+[146/200] 8 BARS OG S GLUTEN FREE NATURE VALLEY Protein COLO 
+[147/200] 8. Dynamic Brain Gummies                             Holland & Barrett: £19.99 [img] [3 for 2]
+[148/200] 9 Vitamines Goût orange, citron, framboise         
+[149/200] Abacavir 20mg/ml oral solution sugar free          
+[150/200] Abacavir 300mg / Lamivudine 150mg / Zidovudine 300 
+[151/200] Abacavir 300mg tablets                             
+[152/200] Abacavir 600mg / Lamivudine 300mg tablets          
+[153/200] Abaloparatide                                      
+[154/200] Abaloparatide 80micrograms/40microlitres solution  
+[155/200] Abatacept 125mg/1ml solution for injection pre-fil 
+[156/200] Abatacept 125mg/1ml solution for injection pre-fil 
+[157/200] Abatacept 250mg powder for solution for infusion v 
+[158/200] Abatacept 50mg/0.4ml solution for injection pre-fi 
+[159/200] Abatacept 87.5mg/0.7ml solution for injection pre- 
+[160/200] Abciximab 10mg/5ml solution for injection vials    
+[161/200] AB Complete                                          Holland & Barrett: £14.99 [img] [3 for 2]
+[162/200] Abemaciclib 100mg tablets                          
+[163/200] Abemaciclib 150mg tablets                          
+[164/200] Abemaciclib 50mg tablets                           
+[165/200] Abiraterone 1g tablets                             
+[166/200] Abiraterone 250mg tablets                          
+[167/200] Abiraterone 500mg tablets                          
+[168/200] Abiraterone Acetate                                
+[169/200] Aboca Colilen Ibs Syndrôme De L'intestin Irritable 
+[170/200] Abrocitinib 100mg tablets                          
+[171/200] Abrocitinib 200mg tablets                          
+[172/200] Abrocitinib 50mg tablets                           
+[173/200] Absolut Repair                                     
+[174/200] Absorbable catgut chromic suture 2gauge 75cm lengt 
+[175/200] Absorbable catgut chromic suture 2gauge 75cm lengt 
+[176/200] Absorbable catgut chromic suture 3.5gauge 75cm len 
+[177/200] Absorbable catgut chromic suture 3.5gauge 75cm len 
+[178/200] Absorbable catgut chromic suture 3.5gauge 75cm len 
+[179/200] Absorbable synthetic suture 1.5gauge 45cm length w 
+[180/200] Absorbable synthetic suture 1.5gauge 45cm length w 
+[181/200] Absorbable synthetic suture 1.5gauge 45cm length w 
+[182/200] Absorbable synthetic suture 1.5gauge 45cm length w 
+[183/200] Absorbable synthetic suture 1.5gauge 70cm length w 
+[184/200] Absorbable synthetic suture 1.5gauge 70cm length w 
+[185/200] Absorbable synthetic suture 1.5gauge 70cm length w 
+[186/200] Absorbable synthetic suture 1.5gauge 75cm length w 
+[187/200] Absorbable synthetic suture 1.5gauge 75cm length w 
+[188/200] Absorbable synthetic suture 1.5gauge 75cm length w 
+[189/200] Absorbable synthetic suture 1gauge 45cm length wit 
+[190/200] Absorbable synthetic suture 1gauge 45cm length wit 
+[191/200] Absorbable synthetic suture 1gauge 45cm length wit 
+[192/200] Absorbable synthetic suture 2gauge 45cm length wit 
+[193/200] Absorbable synthetic suture 2gauge 45cm length wit 
+[194/200] Absorbable synthetic suture 2gauge 45cm length wit 
+[195/200] Absorbable synthetic suture 2gauge 70cm length wit 
+[196/200] Absorbable synthetic suture 2gauge 70cm length wit 
+[197/200] Absorbable synthetic suture 2gauge 70cm length wit 
+[198/200] Absorbable synthetic suture 2gauge 70cm length wit 
+[199/200] Absorbable synthetic suture 2gauge 70cm length wit 
+[200/200] Absorbable synthetic suture 2gauge 70cm length wit 
+
+✅ Done — 7/200 medicines priced, 7 with images, 0 errors

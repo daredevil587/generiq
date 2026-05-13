@@ -1,0 +1,30 @@
+
+=== Holland & Barrett Skincare Scraper ===
+
+DB products loaded: 11,270
+
+Category: shop/beauty-skincare/
+  page 1... 100 products saved:100
+
+Category: shop/beauty-skincare/face/
+  page 1... 100 products saved:100
+
+Category: shop/beauty-skincare/body/
+  page 1... 100 products saved:100
+
+Category: shop/beauty-skincare/hair/
+  page 1... 100 products saved:100
+
+Category: shop/beauty-skincare/lip-care/
+  page 1... 100 products saved:100
+
+Category: shop/beauty-skincare/sun-care/
+  page 1... 100 products saved:100
+
+── Results ──
+  Scraped:  600
+  Matched:  558 (existing DB products)
+  Created:  42 (new products added)
+  Saved:    600 prices with images
+
+Done!

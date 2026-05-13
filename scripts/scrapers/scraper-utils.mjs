@@ -7,6 +7,8 @@ import pg from 'pg';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { chromium as playwrightChromium } from 'playwright-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -78,19 +80,36 @@ export function findBestMatch(scrapedName, dbProducts, minScore = 0.35) {
 
 // ── Upsert price ──────────────────────────────────────────────────────────────
 
-export async function upsertPrice({ medicineId, pharmacyName, pharmacyUrl, priceGbp, packSize, source }) {
+export async function upsertPrice({ medicineId, pharmacyName, pharmacyUrl, priceGbp, packSize, source, imageUrl }) {
   await pool.query(`
     INSERT INTO pharmacy_prices
-      (medicine_id, pharmacy_name, pharmacy_url, price_gbp, in_stock, pack_size, source, last_updated)
-    VALUES ($1, $2, $3, $4, true, $5, $6, NOW())
+      (medicine_id, pharmacy_name, pharmacy_url, price_gbp, in_stock, pack_size, image_url, source, last_updated)
+    VALUES ($1, $2, $3, $4, true, $5, $6, $7, NOW())
     ON CONFLICT (medicine_id, pharmacy_name)
     DO UPDATE SET
       price_gbp    = EXCLUDED.price_gbp,
       pharmacy_url = EXCLUDED.pharmacy_url,
       pack_size    = EXCLUDED.pack_size,
+      image_url    = COALESCE(EXCLUDED.image_url, pharmacy_prices.image_url),
       source       = EXCLUDED.source,
       last_updated = NOW()
-  `, [medicineId, pharmacyName, pharmacyUrl, priceGbp, packSize ?? null, source]);
+  `, [medicineId, pharmacyName, pharmacyUrl, priceGbp, packSize ?? null, imageUrl ?? null, source]);
+}
+
+// ── Insert or get existing medicine by name + category ───────────────────────
+
+export async function upsertMedicine({ name, category, source }) {
+  const existing = await pool.query(
+    'SELECT id FROM medicines WHERE name = $1 AND category = $2 LIMIT 1',
+    [name, category],
+  );
+  if (existing.rows.length > 0) return existing.rows[0].id;
+  const { rows } = await pool.query(`
+    INSERT INTO medicines (name, generic_name, category, description, active_ingredient, dosage_form, mhra_approved, source, created_at)
+    VALUES ($1, $1, $2, '', '', '', false, $3, NOW())
+    RETURNING id
+  `, [name, category, source]);
+  return rows[0]?.id ?? null;
 }
 
 // ── Remove estimated prices once real ones exist ──────────────────────────────
@@ -135,3 +154,8 @@ export const PAGE_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   'Accept-Language': 'en-GB,en;q=0.9',
 };
+
+export async function launchStealthBrowser() {
+  playwrightChromium.use(StealthPlugin());
+  return playwrightChromium.launch(BROWSER_ARGS);
+}
