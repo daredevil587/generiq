@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "pages:build": "npx opennextjs-cloudflare build",
     "start": "next start",
     "lint": "eslint",
     "scrape": "node scripts/scrapers/run-all-scrapers.mjs",
@@ -24,6 +25,7 @@
     "tsx": "^4.21.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -36,6 +38,7 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "wrangler": "^4.98.0",
     "xlsx": "^0.18.5",
     "xml2js": "^0.6.2"
   }
