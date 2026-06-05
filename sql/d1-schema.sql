@@ -1,8 +1,6 @@
 -- GeneriQ Cloudflare D1 (SQLite) schema
--- Apply with: wrangler d1 execute generiq --file=sql/d1-schema.sql
-
-PRAGMA journal_mode=WAL;
-PRAGMA foreign_keys=ON;
+-- Apply with: wrangler d1 execute generiq --remote --file=sql/d1-schema.sql
+-- Note: PRAGMA journal_mode and foreign_keys are managed by D1 internally
 
 CREATE TABLE IF NOT EXISTS medicines (
   id                INTEGER PRIMARY KEY,
@@ -74,6 +72,5 @@ CREATE INDEX IF NOT EXISTS idx_ingredients_name     ON ingredients(ingredient_na
 CREATE UNIQUE INDEX IF NOT EXISTS idx_watchlist_email_med ON watchlist(email, medicine_id);
 CREATE INDEX IF NOT EXISTS idx_watchlist_token      ON watchlist(token);
 
--- Upsert key for scrapers
 CREATE UNIQUE INDEX IF NOT EXISTS pharmacy_prices_upsert_idx
   ON pharmacy_prices(medicine_id, pharmacy_name, COALESCE(pack_size, ''), COALESCE(strength, ''));

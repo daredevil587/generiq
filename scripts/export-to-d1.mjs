@@ -48,9 +48,18 @@ function sqlVal(v) {
 
 async function exportTable(tableName, columns) {
   console.error(`Exporting ${tableName}...`);
-  const { rows } = await pool.query(
-    `SELECT ${columns.join(', ')} FROM ${tableName} ORDER BY id`
-  );
+  let rows;
+  try {
+    ({ rows } = await pool.query(
+      `SELECT ${columns.join(', ')} FROM ${tableName} ORDER BY id`
+    ));
+  } catch (err) {
+    if (err.code === '42P01') {
+      console.error(`  ${tableName}: table does not exist — skipping`);
+      return '';
+    }
+    throw err;
+  }
   if (rows.length === 0) {
     console.error(`  ${tableName}: 0 rows`);
     return '';
@@ -73,8 +82,7 @@ async function exportTable(tableName, columns) {
 
 async function main() {
   let sql = `-- GeneriQ D1 data export generated ${new Date().toISOString()}\n`;
-  sql += `-- Apply with: wrangler d1 execute generiq --file=sql/d1-data.sql\n\n`;
-  sql += `PRAGMA journal_mode=WAL;\n\n`;
+  sql += `-- Apply with: wrangler d1 execute generiq --remote --file=sql/d1-data.sql\n\n`;
 
   sql += await exportTable('medicines', [
     'id', 'name', 'generic_name', 'category', 'description',
