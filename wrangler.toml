@@ -10,4 +10,4 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "generiq"
-database_id = "YOUR-D1-DATABASE-ID"   # Replace after: wrangler d1 create generiq
+database_id = "448a737d-6902-48e9-aed4-b558d10235f5"
