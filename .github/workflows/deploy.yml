@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run pages:build
+        run: npx opennextjs-cloudflare build
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy
