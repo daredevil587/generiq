@@ -105,13 +105,13 @@ export default function BarcodeScanner({ onClose }: { onClose: () => void }) {
     setStatus("lookup");
     try {
       const res  = await fetch(`/api/barcode/${encodeURIComponent(code)}`);
-      const data = await res.json();
+      const data = await res.json() as { found: boolean; id?: number; name?: string | null };
       if (data.found) {
         router.push(`/medicine/${data.id}`);
         onClose();
         return;
       }
-      const name = (data.name as string | null) ?? "";
+      const name = data.name ?? "";
       setProductName(name);
       setSearchInput(name);
       setStatus("notfound");

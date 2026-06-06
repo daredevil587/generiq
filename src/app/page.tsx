@@ -72,7 +72,7 @@ const HOW_IT_WORKS = [
 ];
 
 export default async function HomePage() {
-  const deals = await getTopDeals(6);
+  const deals = await getTopDeals(6).catch(() => []);
 
   return (
     <div className="min-h-screen">

@@ -17,18 +17,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/terms`,                  lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
   ];
 
-  // Fetch only id + created_at to keep memory small
-  const db = await getDB();
-  const { results } = await db.prepare(
-    "SELECT id, created_at FROM medicines ORDER BY id",
-  ).all<{ id: number; created_at: string }>();
+  // Fetch only id + created_at — falls back to static-only if D1 unavailable at build time
+  try {
+    const db = await getDB();
+    const { results } = await db.prepare(
+      "SELECT id, created_at FROM medicines ORDER BY id",
+    ).all<{ id: number; created_at: string }>();
 
-  const productPages: MetadataRoute.Sitemap = results.map((m) => ({
-    url: `${siteUrl}/medicine/${m.id}`,
-    lastModified: new Date(m.created_at),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+    const productPages: MetadataRoute.Sitemap = results.map((m) => ({
+      url: `${siteUrl}/medicine/${m.id}`,
+      lastModified: new Date(m.created_at),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
 
-  return [...staticPages, ...productPages];
+    return [...staticPages, ...productPages];
+  } catch {
+    return staticPages;
+  }
 }

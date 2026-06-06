@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS medicines (
 
 CREATE TABLE IF NOT EXISTS pharmacy_prices (
   id            INTEGER PRIMARY KEY,
-  medicine_id   INTEGER NOT NULL REFERENCES medicines(id) ON DELETE CASCADE,
+  medicine_id   INTEGER NOT NULL,
   pharmacy_name TEXT    NOT NULL,
   pharmacy_url  TEXT,
   price_gbp     REAL    NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS pharmacy_prices (
 
 CREATE TABLE IF NOT EXISTS ingredients (
   id              INTEGER PRIMARY KEY,
-  medicine_id     INTEGER NOT NULL REFERENCES medicines(id) ON DELETE CASCADE,
+  medicine_id     INTEGER NOT NULL,
   ingredient_name TEXT    NOT NULL,
   quantity        TEXT,
   is_active       INTEGER NOT NULL DEFAULT 1

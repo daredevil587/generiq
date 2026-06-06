@@ -53,7 +53,7 @@ export async function searchMHRA(query: string, page = 1): Promise<MHRASearchRes
     throw new Error(`MHRA search failed: ${res.status}`);
   }
 
-  const data = await res.json();
+  const data = await res.json() as { value?: Record<string, string>[]; "@odata.count"?: number };
 
   const results: MHRAProduct[] = (data.value ?? []).map((item: Record<string, string>) => ({
     productName: item.product_name ?? "",

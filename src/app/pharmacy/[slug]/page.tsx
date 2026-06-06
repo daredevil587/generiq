@@ -27,8 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  const pharmacies = await getPharmacyList();
-  return pharmacies.map(p => ({ slug: p.slug }));
+  try {
+    const pharmacies = await getPharmacyList();
+    return pharmacies.map(p => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export const revalidate = 3600;
