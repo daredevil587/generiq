@@ -22,31 +22,76 @@ export const metadata: Metadata = {
 
 const CATEGORIES = [
   {
-    href:      "/search?tab=medicines",
-    label:     "Medicines",
-    desc:      "NHS-licensed drugs & Drug Tariff prices",
-    gradient:  "from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20",
-    border:    "border-blue-100 hover:border-blue-300 dark:border-blue-900 dark:hover:border-blue-700",
-    iconBg:    "bg-blue-600",
+    href:     "/search?tab=medicines",
+    label:    "Medicines",
+    desc:     "NHS-licensed drugs & Drug Tariff prices",
+    gradient: "from-blue-50 to-blue-100/50 dark:from-blue-950/40 dark:to-blue-900/20",
+    border:   "border-blue-100 hover:border-blue-300 dark:border-blue-900 dark:hover:border-blue-700",
+    iconBg:   "bg-blue-600",
     icon: "M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z",
   },
   {
-    href:      "/search?tab=supplements",
-    label:     "Supplements",
-    desc:      "Vitamins, minerals, protein & more",
-    gradient:  "from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20",
-    border:    "border-amber-100 hover:border-amber-300 dark:border-amber-900 dark:hover:border-amber-700",
-    iconBg:    "bg-amber-500",
+    href:     "/search?tab=supplements",
+    label:    "Supplements",
+    desc:     "Vitamins, minerals, protein & more",
+    gradient: "from-amber-50 to-amber-100/50 dark:from-amber-950/40 dark:to-amber-900/20",
+    border:   "border-amber-100 hover:border-amber-300 dark:border-amber-900 dark:hover:border-amber-700",
+    iconBg:   "bg-amber-500",
     icon: "M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z",
   },
   {
-    href:      "/search?tab=skincare",
-    label:     "Skincare & Beauty",
-    desc:      "Serums, moisturisers, SPF & makeup",
-    gradient:  "from-pink-50 to-pink-100/50 dark:from-pink-950/40 dark:to-pink-900/20",
-    border:    "border-pink-100 hover:border-pink-300 dark:border-pink-900 dark:hover:border-pink-700",
-    iconBg:    "bg-pink-500",
+    href:     "/search?tab=skincare",
+    label:    "Skincare & Beauty",
+    desc:     "Serums, moisturisers, SPF & makeup",
+    gradient: "from-pink-50 to-pink-100/50 dark:from-pink-950/40 dark:to-pink-900/20",
+    border:   "border-pink-100 hover:border-pink-300 dark:border-pink-900 dark:hover:border-pink-700",
+    iconBg:   "bg-pink-500",
     icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+  },
+  {
+    href:     "/search?tab=haircare",
+    label:    "Hair Care",
+    desc:     "Shampoo, conditioner & treatments",
+    gradient: "from-violet-50 to-violet-100/50 dark:from-violet-950/40 dark:to-violet-900/20",
+    border:   "border-violet-100 hover:border-violet-300 dark:border-violet-900 dark:hover:border-violet-700",
+    iconBg:   "bg-violet-500",
+    icon: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z",
+  },
+  {
+    href:     "/search?tab=dental",
+    label:    "Dental",
+    desc:     "Toothpaste, mouthwash & whitening",
+    gradient: "from-cyan-50 to-cyan-100/50 dark:from-cyan-950/40 dark:to-cyan-900/20",
+    border:   "border-cyan-100 hover:border-cyan-300 dark:border-cyan-900 dark:hover:border-cyan-700",
+    iconBg:   "bg-cyan-500",
+    icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  },
+  {
+    href:     "/search?tab=baby",
+    label:    "Baby",
+    desc:     "Baby food, formula & snacks",
+    gradient: "from-yellow-50 to-yellow-100/50 dark:from-yellow-950/40 dark:to-yellow-900/20",
+    border:   "border-yellow-100 hover:border-yellow-300 dark:border-yellow-900 dark:hover:border-yellow-700",
+    iconBg:   "bg-yellow-500",
+    icon: "M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.522 4.82 3.889 6.115-.16.59-.477 1.77-.555 2.053-.1.368.134.363.28.265.114-.076 1.809-1.252 2.542-1.762.574.1 1.167.154 1.773.154 4.97 0 9-3.184 9-7.115C21 6.185 16.97 3 12 3z",
+  },
+  {
+    href:     "/search?tab=pet",
+    label:    "Pet Care",
+    desc:     "Dog, cat & small pet products",
+    gradient: "from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-orange-900/20",
+    border:   "border-orange-100 hover:border-orange-300 dark:border-orange-900 dark:hover:border-orange-700",
+    iconBg:   "bg-orange-500",
+    icon: "M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5",
+  },
+  {
+    href:     "/search?tab=sports",
+    label:    "Sports Nutrition",
+    desc:     "Protein, creatine, energy & BCAA",
+    gradient: "from-green-50 to-green-100/50 dark:from-green-950/40 dark:to-green-900/20",
+    border:   "border-green-100 hover:border-green-300 dark:border-green-900 dark:hover:border-green-700",
+    iconBg:   "bg-green-600",
+    icon: "M13 10V3L4 14h7v7l9-11h-7z",
   },
 ];
 
@@ -107,29 +152,24 @@ export default async function HomePage() {
       </section>
 
       {/* ── Category tiles ─────────────────────────────────────────────────── */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <h2 className="text-center text-xs font-semibold text-[var(--color-muted)] uppercase tracking-widest mb-6">
           Browse by category
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.href}
               href={cat.href}
-              className={`group flex sm:flex-col items-center sm:items-center text-left sm:text-center gap-4 sm:gap-0 p-5 sm:p-6 rounded-2xl border-2 bg-gradient-to-br transition-all ${cat.gradient} ${cat.border}`}
+              className={`group flex flex-col items-center text-center gap-0 p-4 sm:p-5 rounded-2xl border-2 bg-gradient-to-br transition-all ${cat.gradient} ${cat.border}`}
             >
-              <div className={`w-12 h-12 rounded-xl ${cat.iconBg} flex items-center justify-center shrink-0 sm:mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${cat.iconBg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm`}>
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d={cat.icon} />
                 </svg>
               </div>
-              <div>
-                <h3 className="font-semibold text-[var(--color-foreground)] mb-0.5">{cat.label}</h3>
-                <p className="text-xs text-[var(--color-muted)]">{cat.desc}</p>
-              </div>
-              <svg className="w-4 h-4 text-[var(--color-muted)] ml-auto sm:hidden shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
+              <h3 className="font-semibold text-sm text-[var(--color-foreground)] mb-0.5 leading-tight">{cat.label}</h3>
+              <p className="text-xs text-[var(--color-muted)] leading-snug hidden sm:block">{cat.desc}</p>
             </Link>
           ))}
         </div>
