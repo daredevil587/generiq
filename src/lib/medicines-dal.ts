@@ -247,16 +247,16 @@ export async function getSearchTabCounts(query: string): Promise<{
   // SQLite doesn't support COUNT(*) FILTER — use SUM(CASE WHEN ...) instead
   const row = await db.prepare(`
     SELECT
-      COUNT(*) AS all,
+      COUNT(*) AS total,
       SUM(CASE WHEN m.category NOT IN ('supplement','skincare') THEN 1 ELSE 0 END) AS medicines,
       SUM(CASE WHEN m.category = 'supplement' THEN 1 ELSE 0 END) AS supplements,
       SUM(CASE WHEN m.category = 'skincare'   THEN 1 ELSE 0 END) AS skincare
     FROM medicines m
     WHERE ${whereSearch}
-  `).bind(...(q ? [q] : [])).first<{ all: number; medicines: number; supplements: number; skincare: number }>();
+  `).bind(...(q ? [q] : [])).first<{ total: number; medicines: number; supplements: number; skincare: number }>();
 
   return {
-    all:         Number(row?.all ?? 0),
+    all:         Number(row?.total ?? 0),
     medicines:   Number(row?.medicines ?? 0),
     supplements: Number(row?.supplements ?? 0),
     skincare:    Number(row?.skincare ?? 0),
