@@ -15,9 +15,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const q = params.q?.trim() ?? "";
   const tab = params.tab ?? "";
 
-  const tabLabel = tab === "medicines" ? "Medicines"
+  const tabLabel = tab === "medicines"   ? "Medicines"
     : tab === "supplements" ? "Supplements"
-    : tab === "skincare" ? "Skincare & Beauty"
+    : tab === "skincare"    ? "Skincare & Beauty"
+    : tab === "haircare"    ? "Hair Care"
+    : tab === "dental"      ? "Dental"
+    : tab === "baby"        ? "Baby Products"
+    : tab === "pet"         ? "Pet Care"
+    : tab === "sports"      ? "Sports Nutrition"
     : "All products";
 
   const title = q
@@ -55,6 +60,11 @@ const TABS = [
   { key: "medicines",   label: "Medicines" },
   { key: "supplements", label: "Supplements" },
   { key: "skincare",    label: "Skincare & Beauty" },
+  { key: "haircare",    label: "Hair Care" },
+  { key: "dental",      label: "Dental" },
+  { key: "baby",        label: "Baby" },
+  { key: "pet",         label: "Pet" },
+  { key: "sports",      label: "Sports Nutrition" },
 ];
 
 const GENDER_TABS = [

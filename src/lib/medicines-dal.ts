@@ -73,9 +73,15 @@ function buildWhere(
     );
   }
 
-  if (tab === 'supplements') conditions.push(`m.category = 'supplement'`);
-  else if (tab === 'skincare')  conditions.push(`m.category = 'skincare'`);
-  else if (tab === 'medicines') conditions.push(`m.category NOT IN ('supplement','skincare')`);
+  const NEW_CATS = `'baby','pet','haircare','dental','sports'`;
+  if      (tab === 'supplements') conditions.push(`m.category = 'supplement'`);
+  else if (tab === 'skincare')    conditions.push(`m.category = 'skincare'`);
+  else if (tab === 'baby')        conditions.push(`m.category = 'baby'`);
+  else if (tab === 'pet')         conditions.push(`m.category = 'pet'`);
+  else if (tab === 'haircare')    conditions.push(`m.category = 'haircare'`);
+  else if (tab === 'dental')      conditions.push(`m.category = 'dental'`);
+  else if (tab === 'sports')      conditions.push(`m.category = 'sports'`);
+  else if (tab === 'medicines')   conditions.push(`m.category NOT IN ('supplement','skincare',${NEW_CATS})`);
 
   if (gender === 'men' || gender === 'women' || gender === 'unisex') {
     params.push(gender);
@@ -237,6 +243,7 @@ export async function getAutocompleteSuggestions(query: string, limit = 7): Prom
 
 export async function getSearchTabCounts(query: string): Promise<{
   all: number; medicines: number; supplements: number; skincare: number;
+  baby: number; pet: number; haircare: number; dental: number; sports: number;
 }> {
   const db = await getDB();
   const q = query.trim() ? `%${query.toLowerCase()}%` : null;
@@ -248,18 +255,28 @@ export async function getSearchTabCounts(query: string): Promise<{
   const row = await db.prepare(`
     SELECT
       COUNT(*) AS total,
-      SUM(CASE WHEN m.category NOT IN ('supplement','skincare') THEN 1 ELSE 0 END) AS medicines,
+      SUM(CASE WHEN m.category NOT IN ('supplement','skincare','baby','pet','haircare','dental','sports') THEN 1 ELSE 0 END) AS medicines,
       SUM(CASE WHEN m.category = 'supplement' THEN 1 ELSE 0 END) AS supplements,
-      SUM(CASE WHEN m.category = 'skincare'   THEN 1 ELSE 0 END) AS skincare
+      SUM(CASE WHEN m.category = 'skincare'   THEN 1 ELSE 0 END) AS skincare,
+      SUM(CASE WHEN m.category = 'baby'       THEN 1 ELSE 0 END) AS baby,
+      SUM(CASE WHEN m.category = 'pet'        THEN 1 ELSE 0 END) AS pet,
+      SUM(CASE WHEN m.category = 'haircare'   THEN 1 ELSE 0 END) AS haircare,
+      SUM(CASE WHEN m.category = 'dental'     THEN 1 ELSE 0 END) AS dental,
+      SUM(CASE WHEN m.category = 'sports'     THEN 1 ELSE 0 END) AS sports
     FROM medicines m
     WHERE ${whereSearch}
-  `).bind(...(q ? [q] : [])).first<{ total: number; medicines: number; supplements: number; skincare: number }>();
+  `).bind(...(q ? [q] : [])).first<{ total: number; medicines: number; supplements: number; skincare: number; baby: number; pet: number; haircare: number; dental: number; sports: number }>();
 
   return {
     all:         Number(row?.total ?? 0),
     medicines:   Number(row?.medicines ?? 0),
     supplements: Number(row?.supplements ?? 0),
     skincare:    Number(row?.skincare ?? 0),
+    baby:        Number(row?.baby ?? 0),
+    pet:         Number(row?.pet ?? 0),
+    haircare:    Number(row?.haircare ?? 0),
+    dental:      Number(row?.dental ?? 0),
+    sports:      Number(row?.sports ?? 0),
   };
 }
 
