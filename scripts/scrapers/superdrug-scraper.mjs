@@ -5,9 +5,10 @@
  * Usage: node scripts/scrapers/superdrug-scraper.mjs
  */
 
+import * as cheerio from 'cheerio';
 import {
   pool, loadDbProducts, findBestMatch, upsertPrice, upsertMedicine, sleep, randDelay,
-  launchStealthBrowser, PAGE_HEADERS,
+  launchStealthBrowser, PAGE_HEADERS, fetchWithProxy, genericProductExtract, normaliseName,
 } from './scraper-utils.mjs';
 
 const PHARMACY_NAME = 'Superdrug';
@@ -31,6 +32,71 @@ const SEED_URLS = [
 ];
 
 const MAX_PAGES = 8;
+
+// ── ScraperAPI fetch for Superdrug (bypasses Cloudflare) ─────────────────────
+
+function parseSuperdrugHtml(html) {
+  const $ = cheerio.load(html);
+  const products = [];
+  const seen = new Set();
+
+  $('script[type="application/ld+json"]').each((_, el) => {
+    try {
+      const data = JSON.parse($(el).html());
+      const items = Array.isArray(data) ? data :
+                   data['@type'] === 'ItemList' ? data.itemListElement : [data];
+      for (const item of items) {
+        const prod = item.item || item;
+        if (prod['@type'] !== 'Product' || !prod.name) continue;
+        const price = parseFloat(prod.offers?.price ?? prod.offers?.lowPrice ?? 0);
+        const url = prod.url || '';
+        if (!price || !url || seen.has(url)) continue;
+        seen.add(url);
+        products.push({ name: prod.name, price, url: url.startsWith('http') ? url : `https://www.superdrug.com${url}`, size: null, image: null });
+      }
+    } catch {}
+  });
+
+  if (products.length > 0) return products;
+
+  const SELS = [
+    '[class*="ProductItem" i]', '[class*="product-item" i]',
+    '[data-testid="product-card"]', '[class*="plp-item" i]',
+    '.product-card', '.product', 'article.product',
+  ];
+
+  let $cards = $([]);
+  for (const sel of SELS) { $cards = $(sel); if ($cards.length > 0) break; }
+
+  $cards.each((_, el) => {
+    const $c = $(el);
+    const text = $c.text();
+    const pm = text.match(/£([\d.,]+)/);
+    if (!pm) return;
+    const price = parseFloat(pm[1].replace(',', ''));
+    if (isNaN(price) || price <= 0) return;
+    const href = $c.find('a[href]').first().attr('href') || '';
+    if (!href || seen.has(href)) return;
+    seen.add(href);
+    const name = ($c.find('h2, h3, [class*="name" i], [class*="title" i]').first().text().trim() || $c.find('a').first().text().trim()).replace(/\s+/g, ' ').slice(0, 200);
+    if (!name || name.length < 3) return;
+    const fullUrl = href.startsWith('http') ? href : `https://www.superdrug.com${href}`;
+    products.push({ name, price, url: fullUrl, size: null, image: null });
+  });
+
+  return products;
+}
+
+async function scrapeSuperdrugViaProxy(url) {
+  try {
+    const html = await fetchWithProxy(url, { render: true, retries: 2, timeout: 40000 });
+    if (!html) return [];
+    return parseSuperdrugHtml(html);
+  } catch (err) {
+    process.stderr.write(`  [proxy error: ${err.message}]\n`);
+    return [];
+  }
+}
 
 async function scrapeSuperdrugPage(page, url) {
   const products = [];
@@ -107,21 +173,36 @@ async function getNextPageUrl(page) {
 async function main() {
   console.log('\n=== Superdrug Scraper ===\n');
 
+  const useProxy = !!process.env.SCRAPER_API_KEY;
+  if (useProxy) {
+    console.log('  ✓ ScraperAPI proxy active — Superdrug Cloudflare blocking bypassed');
+  } else {
+    console.log('  ℹ No SCRAPER_API_KEY — using Playwright stealth (may be blocked by Cloudflare)');
+    console.log('    To enable proxy: set SCRAPER_API_KEY=your_key in .env.local');
+  }
+
   const dbProducts = await loadDbProducts(['skincare', 'supplement']);
   console.log(`DB products loaded: ${dbProducts.length.toLocaleString()}`);
 
-  const browser = await launchStealthBrowser();
-  const context = await browser.newContext({
-    extraHTTPHeaders: PAGE_HEADERS,
-    viewport: { width: 1280, height: 800 },
-    locale: 'en-GB',
-  });
-  const page = await context.newPage();
-  page.on('console', () => {});
-  page.on('pageerror', () => {});
+  let browser;
+  const page_holder = { page: null };
 
-  const stats = { scraped: 0, matched: 0, updated: 0, unmatched: 0 };
-  const unmatchedNames = [];
+  if (!useProxy) {
+    browser = await launchStealthBrowser();
+    const context = await browser.newContext({
+      extraHTTPHeaders: PAGE_HEADERS,
+      viewport: { width: 1920, height: 1080 },
+      locale: 'en-GB',
+      timezoneId: 'Europe/London',
+    });
+    page_holder.page = await context.newPage();
+    page_holder.page.on('console', () => {});
+    page_holder.page.on('pageerror', () => {});
+  }
+
+  const stats = { scraped: 0, matched: 0, created: 0, updated: 0 };
+  const allProducts = [];
+  const seenUrls = new Set();
 
   for (const seedUrl of SEED_URLS) {
     console.log(`\nCategory: ${seedUrl.split('superdrug.com/')[1]}`);
@@ -129,69 +210,80 @@ async function main() {
     let currentUrl = seedUrl;
     for (let p = 0; p < MAX_PAGES; p++) {
       process.stdout.write(`  page ${p + 1}...`);
-      const products = await scrapeSuperdrugPage(page, currentUrl);
-      process.stdout.write(` ${products.length} products`);
 
-      if (products.length === 0) {
-        process.stdout.write(' (empty)\n');
-        break;
+      let products;
+      if (useProxy) {
+        products = await scrapeSuperdrugViaProxy(currentUrl);
+      } else {
+        products = await scrapeSuperdrugPage(page_holder.page, currentUrl);
       }
 
-      stats.scraped += products.length;
-      let pageMatched = 0;
+      process.stdout.write(` ${products.length} products\n`);
+      if (products.length === 0) break;
 
       for (const prod of products) {
-        let match = findBestMatch(prod.name, dbProducts);
-        let medicineId;
-
-        if (match) {
-          medicineId = match.product.id;
-          stats.matched++;
-        } else {
-          medicineId = await upsertMedicine({ name: prod.name, category: 'skincare', source: SOURCE });
-          if (!medicineId) { stats.unmatched++; continue; }
-          dbProducts.push({ id: medicineId, name: prod.name, category: 'skincare', norm: prod.name.toLowerCase() });
-          stats.unmatched++;
-        }
-
-        pageMatched++;
-        try {
-          await upsertPrice({
-            medicineId,
-            pharmacyName: PHARMACY_NAME,
-            pharmacyUrl:  prod.url,
-            priceGbp:     prod.price,
-            packSize:     prod.size,
-            imageUrl:     prod.image,
-            source:       SOURCE,
-          });
-          stats.updated++;
-        } catch (e) {
-          process.stderr.write(`  [db error: ${e.message}]\n`);
+        if (!seenUrls.has(prod.url)) {
+          seenUrls.add(prod.url);
+          allProducts.push(prod);
         }
       }
 
-      process.stdout.write(` matched:${pageMatched}\n`);
+      if (!useProxy) {
+        const nextUrl = await getNextPageUrl(page_holder.page);
+        if (!nextUrl) break;
+        currentUrl = nextUrl;
+      } else {
+        // Superdrug pagination: try ?start=N or page=N
+        currentUrl = `${seedUrl}?start=${(p + 1) * 24}`;
+      }
 
-      const nextUrl = await getNextPageUrl(page);
-      if (!nextUrl) break;
-      currentUrl = nextUrl;
-      await randDelay(1000, 2500);
+      await randDelay(useProxy ? 1500 : 1000, useProxy ? 3000 : 2500);
     }
   }
 
-  await browser.close();
+  if (browser) await browser.close();
+
+  console.log(`\n── Matching ${allProducts.length} products ──`);
+  stats.scraped = allProducts.length;
+
+  for (const prod of allProducts) {
+    const match = findBestMatch(prod.name, dbProducts);
+    let medicineId;
+
+    if (match) {
+      medicineId = match.product.id;
+      stats.matched++;
+    } else {
+      try {
+        const cat = prod.name.toLowerCase().match(/vitamin|omega|zinc|magnesium|supplement|probiotic/) ? 'supplement' : 'skincare';
+        medicineId = await upsertMedicine({ name: prod.name, category: cat, source: SOURCE });
+        if (!medicineId) continue;
+        dbProducts.push({ id: medicineId, name: prod.name, category: cat, norm: normaliseName(prod.name) });
+        stats.created++;
+      } catch { continue; }
+    }
+
+    try {
+      await upsertPrice({
+        medicineId,
+        pharmacyName: PHARMACY_NAME,
+        pharmacyUrl:  prod.url,
+        priceGbp:     prod.price,
+        packSize:     prod.size ?? null,
+        imageUrl:     prod.image ?? null,
+        source:       SOURCE,
+      });
+      stats.updated++;
+    } catch (e) {
+      process.stderr.write(`  [db error: ${e.message}]\n`);
+    }
+  }
 
   console.log('\n── Results ──');
-  console.log(`  Scraped:   ${stats.scraped}`);
-  console.log(`  Matched:   ${stats.matched}`);
-  console.log(`  Updated:   ${stats.updated}`);
-  console.log(`  Unmatched: ${stats.unmatched}`);
-
-  if (unmatchedNames.length > 0) {
-    console.log('\n  Sample unmatched (first 10):');
-    unmatchedNames.slice(0, 10).forEach(n => console.log(`    - ${n}`));
-  }
+  console.log(`  Scraped:  ${stats.scraped}`);
+  console.log(`  Matched:  ${stats.matched}`);
+  console.log(`  Created:  ${stats.created}`);
+  console.log(`  Updated:  ${stats.updated}`);
 
   await pool.end();
   console.log('\nDone!');

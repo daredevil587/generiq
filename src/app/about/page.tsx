@@ -60,13 +60,8 @@ const DATA_SOURCES = [
   },
   {
     title: "Holland & Barrett Live Prices",
-    desc: "Real scraped prices from hollandandbarrett.com, updated daily for supplements and health products.",
+    desc: "Live prices from hollandandbarrett.com, updated daily for supplements and health products.",
     href: "https://www.hollandandbarrett.com",
-  },
-  {
-    title: "Awin Affiliate Feeds",
-    desc: "Product and price feeds from Boots and Superdrug via the Awin affiliate network (approval pending).",
-    href: "https://www.awin.com",
   },
 ];
 
@@ -77,8 +72,7 @@ export default function AboutPage() {
       {/* Header */}
       <h1 className="text-3xl font-bold text-[var(--color-foreground)] mb-2">About GeneriQ</h1>
       <p className="text-[var(--color-muted)] text-lg mb-10">
-        Compare prices for medicines, supplements and skincare across UK pharmacies and globally.
-        Stop overpaying for your health.
+        Compare medicine and health product prices in the UK. Find cheaper generics, NHS prescription savings and price drops.
       </p>
 
       <div className="space-y-6">
@@ -156,7 +150,7 @@ export default function AboutPage() {
             equivalent at a local pharmacy.
           </p>
           <p className="text-sm leading-relaxed text-white/90">
-            GeneriQ fixes the information gap. We&apos;re starting in the UK and building towards a global
+            GeneriQ fixes the information gap. We cover the UK and are building towards a global
             comparison platform — because the price disparity is even greater between countries. The same
             pill that costs £2 in the UK can cost $40 in the USA, or be almost free in India.
           </p>

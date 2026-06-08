@@ -1,11 +1,11 @@
-// Pure client-safe formatting utilities — no pg imports
+// Pure client-safe formatting utilities - no database imports.
 
 export function formatGBP(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "";
   const n = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(n)) return "";
   if (n < 1) return `${Math.round(n * 100)}p`;
-  return `£${n.toFixed(2)}`;
+  return `\u00A3${n.toFixed(2)}`;
 }
 
 export function parseBrandNames(csv: string | null | undefined): string[] {
@@ -55,6 +55,6 @@ export function pricePerUnit(price: string | number, packSize: string | null | u
     ? `${(ppu * 100).toFixed(1)}p`
     : ppu < 1
     ? `${Math.round(ppu * 100)}p`
-    : `£${ppu.toFixed(2)}`;
+    : `\u00A3${ppu.toFixed(2)}`;
   return `${formatted}/${parsed.unit}`;
 }

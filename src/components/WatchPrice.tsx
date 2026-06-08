@@ -12,16 +12,18 @@ interface Props {
 export default function WatchPrice({ medicineId, medicineName, currentPrice }: Props) {
   const [open, setOpen]   = useState(false);
   const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "exists" | "error">("idle");
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!consent) return;
     setStatus("loading");
     try {
       const res = await fetch("/api/alerts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, medicineId }),
+        body: JSON.stringify({ email, medicineId, consent: true }),
       });
       const data = await res.json() as { alreadyExists?: boolean };
       if (res.ok) setStatus(data.alreadyExists ? "exists" : "done");
@@ -78,22 +80,40 @@ export default function WatchPrice({ medicineId, medicineName, currentPrice }: P
       )}
 
       {(status === "idle" || status === "loading" || status === "error") && (
-        <form onSubmit={submit} className="flex gap-2">
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className="flex-1 min-w-0 text-sm border border-[var(--color-border)] rounded-xl px-3 py-2.5 bg-[var(--color-surface)] text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-brand)]"
-          />
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="shrink-0 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60"
-          >
-            {status === "loading" ? "…" : "Alert me"}
-          </button>
+        <form onSubmit={submit}>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="flex-1 min-w-0 text-sm border border-[var(--color-border)] rounded-xl px-3 py-2.5 bg-[var(--color-surface)] text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:outline-none focus:border-[var(--color-brand)]"
+            />
+            <button
+              type="submit"
+              disabled={status === "loading" || !consent}
+              className="shrink-0 bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60"
+            >
+              {status === "loading" ? "…" : "Alert me"}
+            </button>
+          </div>
+
+          {/* Email consent checkbox */}
+          <label className="flex items-start gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={e => setConsent(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-brand)] accent-[var(--color-brand)] shrink-0"
+            />
+            <span className="text-[11px] text-[var(--color-muted)] leading-snug group-hover:text-[var(--color-foreground)] transition-colors">
+              I agree to receive price alert emails for this product. We&apos;ll only email you about price changes — no spam.{" "}
+              <a href="/privacy" target="_blank" className="text-[var(--color-brand)] hover:underline">
+                Privacy Policy
+              </a>
+            </span>
+          </label>
         </form>
       )}
 

@@ -69,7 +69,8 @@ function buildWhere(
     conditions.push(
       `(LOWER(m.name) LIKE ?${n} OR LOWER(m.generic_name) LIKE ?${n}` +
       ` OR LOWER(m.active_ingredient) LIKE ?${n} OR LOWER(m.category) LIKE ?${n}` +
-      ` OR LOWER(m.brand_names) LIKE ?${n})`,
+      ` OR LOWER(m.brand_names) LIKE ?${n}` +
+      ` OR EXISTS (SELECT 1 FROM ingredients i WHERE i.medicine_id = m.id AND LOWER(i.ingredient_name) LIKE ?${n}))`,
     );
   }
 
@@ -227,18 +228,51 @@ export async function getIngredientsByMedicineId(medicineId: number): Promise<In
   return results;
 }
 
-export async function getAutocompleteSuggestions(query: string, limit = 7): Promise<string[]> {
+export type AutocompleteSuggestion =
+  | { type: 'medicine';   label: string; href: string }
+  | { type: 'ingredient'; label: string; href: string };
+
+export async function getAutocompleteSuggestions(
+  query: string,
+  limit = 7,
+): Promise<AutocompleteSuggestion[]> {
   const db = await getDB();
   const q = `${query.toLowerCase()}%`;
-  const { results } = await db.prepare(`
-    SELECT DISTINCT name
-    FROM   medicines
-    WHERE  LOWER(name) LIKE ?1
-        OR LOWER(generic_name) LIKE ?1
-    ORDER  BY name
-    LIMIT  ?2
-  `).bind(q, limit).all<{ name: string }>();
-  return results.map(r => r.name);
+  const medLimit = Math.max(4, limit - 2);
+
+  const [medRes, ingRes] = await Promise.all([
+    db.prepare(`
+      SELECT DISTINCT name
+      FROM   medicines
+      WHERE  LOWER(name) LIKE ?1 OR LOWER(generic_name) LIKE ?1
+      ORDER  BY name
+      LIMIT  ?2
+    `).bind(q, medLimit).all<{ name: string }>(),
+    db.prepare(`
+      SELECT DISTINCT ingredient_name
+      FROM   ingredients
+      WHERE  LOWER(ingredient_name) LIKE ?1
+      ORDER  BY ingredient_name
+      LIMIT  ?2
+    `).bind(q, 3).all<{ ingredient_name: string }>(),
+  ]);
+
+  const medicines: AutocompleteSuggestion[] = medRes.results.map(r => ({
+    type: 'medicine',
+    label: r.name,
+    href: `/search?q=${encodeURIComponent(r.name)}`,
+  }));
+
+  const seen = new Set(medicines.map(m => m.label.toLowerCase()));
+  const ingredients: AutocompleteSuggestion[] = ingRes.results
+    .filter(r => !seen.has(r.ingredient_name.toLowerCase()))
+    .map(r => ({
+      type: 'ingredient',
+      label: r.ingredient_name,
+      href: `/ingredient/${slugify(r.ingredient_name)}`,
+    }));
+
+  return [...medicines, ...ingredients].slice(0, limit);
 }
 
 export async function getSearchTabCounts(query: string): Promise<{
@@ -302,14 +336,48 @@ export async function getTopDeals(limit = 6): Promise<MedicineWithPrice[]> {
   return results;
 }
 
+// Words that are never the active ingredient — brand prefixes, dose forms, modifiers.
+const PHARMA_STOP = new Set([
+  'almus','accord','actavis','teva','mylan','zentiva','ratiopharm','sandoz','wockhardt',
+  'boots','superdrug','lloyds','tesco','asda','sainsburys','day','lewis',
+  'nurofen','calpol','calprofen','panadol','imodium','rennie','gaviscon',
+  'strepsils','benylin','covonia','sudafed','piriton','clarityn',
+  'children','childrens','adults','adult','baby','infant','junior',
+  'max','maximum','extra','ultra','plus','double','high','strength',
+  'oral','suspension','solution','tablet','tablets','capsule','capsules',
+  'caplet','caplets','gel','cream','drops','spray','syrup','liquid','elixir',
+  'patch','suppositories','effervescent','soluble','prolonged','modified',
+  'slow','sustained','immediate','release','flavour','flavored','flavoured',
+  'pain','fever','relief','cold','flu','allergy','hayfever','runny',
+  'heartburn','indigestion','diarrhoea','diarrhea','nausea',
+  'sore','throat','cough','nasal','eye','ear',
+  'and','with','for','the','of','in','to','or','by','from','at',
+]);
+
+function extractDrugKeyword(name: string, activeIngredient: string | null): string {
+  if (activeIngredient?.trim()) {
+    return activeIngredient.split(/[\s,/+]+/)[0].trim().toLowerCase();
+  }
+  const words = name.split(/[\s\-/,()]+/);
+  for (const w of words) {
+    const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    if (clean.length >= 4 && !PHARMA_STOP.has(clean) && !/^\d/.test(w)) {
+      return clean;
+    }
+  }
+  return '';
+}
+
 export async function getGenericAlternatives(
   medicineId: number,
   genericName: string | null,
   activeIngredient: string | null,
   limit = 5,
 ): Promise<MedicineWithPrice[]> {
-  const keyword = ((activeIngredient || genericName) ?? '')
-    .split(/\s+/)[0].trim().toLowerCase();
+  const keyword = extractDrugKeyword(
+    (activeIngredient || genericName) ?? '',
+    activeIngredient,
+  );
   if (!keyword || keyword.length < 3) return [];
 
   const db = await getDB();
@@ -321,9 +389,13 @@ export async function getGenericAlternatives(
     WHERE  m.id != ?1
       AND  m.category NOT IN ('supplement', 'skincare')
       AND  (
-        LOWER(m.name)               LIKE ?2
-        OR LOWER(m.generic_name)    LIKE ?2
+        LOWER(m.name)                 LIKE ?2
+        OR LOWER(m.generic_name)      LIKE ?2
         OR LOWER(m.active_ingredient) LIKE ?2
+        OR EXISTS (
+          SELECT 1 FROM ingredients i
+          WHERE i.medicine_id = m.id AND LOWER(i.ingredient_name) LIKE ?2
+        )
       )
     GROUP  BY m.id
     ORDER  BY MIN(pp.price_gbp) ASC NULLS LAST
@@ -386,6 +458,46 @@ export async function getPharmacyList(): Promise<Array<{ pharmacy_name: string; 
     pharmacy_name: r.pharmacy_name,
     slug: slugify(r.pharmacy_name),
     count: Number(r.count),
+  }));
+}
+
+export async function getRetailerCoverage(): Promise<Array<{
+  pharmacy_name: string;
+  slug: string;
+  product_count: number;
+  live_price_count: number;
+  in_stock_count: number;
+  last_checked: string | null;
+  sources: string;
+}>> {
+  const db = await getDB();
+  const { results } = await db.prepare(`
+    SELECT
+      pharmacy_name,
+      COUNT(DISTINCT medicine_id) AS product_count,
+      COUNT(*) AS live_price_count,
+      SUM(CASE WHEN in_stock THEN 1 ELSE 0 END) AS in_stock_count,
+      MAX(last_updated) AS last_checked,
+      GROUP_CONCAT(DISTINCT COALESCE(source, 'retailer')) AS sources
+    FROM pharmacy_prices
+    WHERE source != 'nhs_drug_tariff'
+    GROUP BY pharmacy_name
+    ORDER BY product_count DESC, pharmacy_name ASC
+  `).all<{
+    pharmacy_name: string;
+    product_count: number;
+    live_price_count: number;
+    in_stock_count: number;
+    last_checked: string | null;
+    sources: string;
+  }>();
+
+  return results.map(r => ({
+    ...r,
+    slug: slugify(r.pharmacy_name),
+    product_count: Number(r.product_count ?? 0),
+    live_price_count: Number(r.live_price_count ?? 0),
+    in_stock_count: Number(r.in_stock_count ?? 0),
   }));
 }
 

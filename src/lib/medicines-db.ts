@@ -38,7 +38,7 @@ export interface PharmacyPrice {
   isPlaceholder: boolean;
 }
 
-// Seed data â€” NHS Drug Tariff Category C indicative prices (pence)
+// Seed data - NHS Drug Tariff Category C indicative prices (pence)
 // Pharmacy prices are representative placeholders until live feeds are connected
 export const MEDICINES: Medicine[] = [
   {
@@ -193,7 +193,7 @@ export const MEDICINES: Medicine[] = [
     id: "atorvastatin",
     name: "Atorvastatin",
     brandNames: ["Lipitor"],
-    category: "Cardiovascular â€” Lipid Regulating",
+    category: "Cardiovascular - Lipid Regulating",
     description: "HMG-CoA reductase inhibitor (statin) for lowering cholesterol and reducing cardiovascular risk.",
     mhraLicenseNumbers: ["PL 00057/0853"],
     source: 'seed' as const,
@@ -259,7 +259,7 @@ export const MEDICINES: Medicine[] = [
     id: "lisinopril",
     name: "Lisinopril",
     brandNames: ["Zestril", "Carace"],
-    category: "Cardiovascular â€” ACE Inhibitors",
+    category: "Cardiovascular - ACE Inhibitors",
     description: "ACE inhibitor for hypertension, heart failure, and diabetic nephropathy.",
     mhraLicenseNumbers: ["PL 00057/0427"],
     source: 'seed' as const,
@@ -307,7 +307,7 @@ export const MEDICINES: Medicine[] = [
     id: "amlodipine",
     name: "Amlodipine",
     brandNames: ["Istin"],
-    category: "Cardiovascular â€” Calcium Channel Blockers",
+    category: "Cardiovascular - Calcium Channel Blockers",
     description: "Calcium channel blocker for hypertension and angina.",
     mhraLicenseNumbers: ["PL 00057/0523"],
     source: 'seed' as const,
@@ -355,7 +355,7 @@ export const MEDICINES: Medicine[] = [
     id: "metformin",
     name: "Metformin",
     brandNames: ["Glucophage"],
-    category: "Diabetes â€” Biguanides",
+    category: "Diabetes - Biguanides",
     description: "First-line oral antidiabetic for type 2 diabetes mellitus.",
     mhraLicenseNumbers: ["PL 11648/0010"],
     source: 'seed' as const,
@@ -403,7 +403,7 @@ export const MEDICINES: Medicine[] = [
     id: "omeprazole",
     name: "Omeprazole",
     brandNames: ["Losec", "Mepradec"],
-    category: "Gastro-intestinal â€” Proton Pump Inhibitors",
+    category: "Gastro-intestinal - Proton Pump Inhibitors",
     description: "Proton pump inhibitor (PPI) for gastric acid-related conditions including GORD and peptic ulcers.",
     mhraLicenseNumbers: ["PL 15513/0205"],
     source: 'seed' as const,
@@ -451,7 +451,7 @@ export const MEDICINES: Medicine[] = [
     id: "sertraline",
     name: "Sertraline",
     brandNames: ["Lustral"],
-    category: "Antidepressants â€” SSRIs",
+    category: "Antidepressants - SSRIs",
     description: "Selective serotonin reuptake inhibitor (SSRI) for depression, OCD, panic disorder and PTSD.",
     mhraLicenseNumbers: ["PL 00057/0600"],
     source: 'seed' as const,
@@ -499,7 +499,7 @@ export const MEDICINES: Medicine[] = [
     id: "salbutamol",
     name: "Salbutamol",
     brandNames: ["Ventolin", "Salamol", "Airomir"],
-    category: "Respiratory â€” Bronchodilators",
+    category: "Respiratory - Bronchodilators",
     description: "Short-acting beta-2 agonist (SABA) for acute relief of bronchospasm in asthma and COPD.",
     mhraLicenseNumbers: ["PL 00221/0102", "PL 17780/0043"],
     source: 'seed' as const,
@@ -529,7 +529,7 @@ export const MEDICINES: Medicine[] = [
     id: "ramipril",
     name: "Ramipril",
     brandNames: ["Tritace"],
-    category: "Cardiovascular â€” ACE Inhibitors",
+    category: "Cardiovascular - ACE Inhibitors",
     description: "ACE inhibitor for hypertension, heart failure, post-MI, and diabetic nephropathy.",
     mhraLicenseNumbers: ["PL 04452/0003"],
     source: 'seed' as const,
@@ -577,7 +577,7 @@ export const MEDICINES: Medicine[] = [
     id: "bisoprolol",
     name: "Bisoprolol",
     brandNames: ["Cardicor", "Emcor"],
-    category: "Cardiovascular â€” Beta Blockers",
+    category: "Cardiovascular - Beta Blockers",
     description: "Selective beta-1 blocker for hypertension, angina, and heart failure.",
     mhraLicenseNumbers: ["PL 04452/0015"],
     source: 'seed' as const,
@@ -673,7 +673,7 @@ export const MEDICINES: Medicine[] = [
     id: "fluoxetine",
     name: "Fluoxetine",
     brandNames: ["Prozac", "Oxactin"],
-    category: "Antidepressants â€” SSRIs",
+    category: "Antidepressants - SSRIs",
     description: "SSRI for depression, OCD, bulimia nervosa and panic disorder.",
     mhraLicenseNumbers: ["PL 00057/0386"],
     source: 'seed' as const,
@@ -703,7 +703,7 @@ export const MEDICINES: Medicine[] = [
     id: "lansoprazole",
     name: "Lansoprazole",
     brandNames: ["Zoton FasTab"],
-    category: "Gastro-intestinal â€” Proton Pump Inhibitors",
+    category: "Gastro-intestinal - Proton Pump Inhibitors",
     description: "Proton pump inhibitor for GORD, peptic ulcers, and H. pylori eradication.",
     mhraLicenseNumbers: ["PL 04425/0125"],
     source: 'seed' as const,
@@ -751,7 +751,7 @@ export const MEDICINES: Medicine[] = [
     id: "doxycycline",
     name: "Doxycycline",
     brandNames: ["Vibramycin-D", "Efracea"],
-    category: "Antibacterials â€” Tetracyclines",
+    category: "Antibacterials - Tetracyclines",
     description: "Tetracycline antibiotic for respiratory, urogenital and skin infections, and malaria prophylaxis.",
     mhraLicenseNumbers: ["PL 00057/0449"],
     source: 'seed' as const,
@@ -781,7 +781,7 @@ export const MEDICINES: Medicine[] = [
     id: "simvastatin",
     name: "Simvastatin",
     brandNames: ["Zocor"],
-    category: "Cardiovascular â€” Lipid Regulating",
+    category: "Cardiovascular - Lipid Regulating",
     description: "HMG-CoA reductase inhibitor (statin) for lowering cholesterol.",
     mhraLicenseNumbers: ["PL 00025/0310"],
     source: 'seed' as const,
@@ -845,7 +845,7 @@ export function getMedicineById(id: string): Medicine | undefined {
 
 export function formatPrice(pence: number): string {
   if (pence < 100) return `${pence}p`;
-  return `Â£${(pence / 100).toFixed(2)}`;
+  return `£${(pence / 100).toFixed(2)}`;
 }
 
 export const CATEGORIES = [...new Set(MEDICINES.map((m) => m.category))].sort();

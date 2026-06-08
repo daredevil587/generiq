@@ -8,11 +8,17 @@ import {
   parseBrandNames,
 } from "@/lib/medicines-dal";
 import { formatGBP } from "@/lib/format-utils";
+import { NHS_RX_CHARGE, PPC_ANNUAL } from "@/lib/config";
 import PriceTable from "@/components/PriceTable";
 import BackButton from "@/components/BackButton";
 import TrackView from "@/components/TrackView";
 import WatchPrice from "@/components/WatchPrice";
 import NhsEligibilityChecker from "@/components/NhsEligibilityChecker";
+import SavingsSummary from "@/components/SavingsSummary";
+import ProductTrustDashboard from "@/components/ProductTrustDashboard";
+import GenericEquivalence from "@/components/GenericEquivalence";
+import PriceHistorySnapshot from "@/components/PriceHistorySnapshot";
+import SaveMedicineButton from "@/components/SaveMedicineButton";
 import type { Metadata } from "next";
 import { siteUrl } from "@/lib/site-url";
 import { slugify } from "@/lib/format-utils";
@@ -134,8 +140,7 @@ export default async function MedicinePage({ params }: Props) {
   const retailMinPrice = retailPrices[0]?.price_gbp ?? null;
 
   // NHS prescription charge and PPC constants
-  const NHS_RX_CHARGE = 9.90;
-  const PPC_ANNUAL    = 111.60;
+  // NHS constants imported from @/lib/config
 
   // ── Feature E: cheaper alternative with same ingredient ──────────────────
   const retailCheapestVal = retailPrices[0] ? parseFloat(retailPrices[0].price_gbp) : null;
@@ -144,7 +149,6 @@ export default async function MedicinePage({ params }: Props) {
   ) ?? null;
 
   // ── Feature D: annual savings calculator ─────────────────────────────────
-  const rxSavingPerItem  = retailCheapestVal !== null ? retailCheapestVal - NHS_RX_CHARGE : null;
   const otcSavingPerItem = retailCheapestVal !== null ? NHS_RX_CHARGE - retailCheapestVal : null;
   const buyOtcIsCheaper  = retailCheapestVal !== null && retailCheapestVal < NHS_RX_CHARGE;
 
@@ -185,6 +189,12 @@ export default async function MedicinePage({ params }: Props) {
               MHRA Approved
             </span>
           )}
+          <SaveMedicineButton
+            id={medicine.id}
+            name={medicine.name}
+            category={medicine.category}
+            min_price={retailMinPrice}
+          />
         </div>
 
         {/* Title row */}
@@ -265,6 +275,10 @@ export default async function MedicinePage({ params }: Props) {
         </div>
       </div>
 
+      <ProductTrustDashboard prices={prices} mhraApproved={medicine.mhra_approved} />
+
+      <SavingsSummary prices={prices} category={medicine.category} />
+
       {/* E — Same ingredient, lower price banner */}
       {cheaperAlternative && (
         <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-2xl px-5 py-4 mb-5">
@@ -290,6 +304,8 @@ export default async function MedicinePage({ params }: Props) {
         </div>
       )}
 
+      <GenericEquivalence medicine={medicine} ingredients={ingredients} />
+
       {/* Price comparison */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6">
         <h2 className="font-bold text-[var(--color-foreground)] text-lg mb-5 flex items-center gap-2">
@@ -300,6 +316,8 @@ export default async function MedicinePage({ params }: Props) {
         </h2>
         <PriceTable prices={prices} medicineName={medicine.name} />
       </div>
+
+      <PriceHistorySnapshot prices={prices} />
 
       {/* Feature 3 — How to Save More Tips */}
       {medicine.category === 'medicine' && (
@@ -477,7 +495,7 @@ export default async function MedicinePage({ params }: Props) {
       {/* Disclaimer */}
       <div className="mt-5 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-xl p-4">
         <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-          <strong>Important:</strong> Prices are for comparison purposes only and may vary. Many medicines require a valid UK prescription. Always consult your GP or pharmacist. NHS prescription charge is currently £{(9.90).toFixed(2)}/item (free for eligible patients).
+          <strong>Important:</strong> Prices are for comparison purposes only and may vary. Many medicines require a valid UK prescription. Always consult your GP or pharmacist. NHS prescription charge is currently £{NHS_RX_CHARGE.toFixed(2)}/item (free for eligible patients).
         </p>
       </div>
 
