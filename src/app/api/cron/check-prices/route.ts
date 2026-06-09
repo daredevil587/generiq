@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getWatchlistForPriceCheck, updateWatchlistPrice } from "@/lib/medicines-dal";
+import { getWatchlistForPriceCheck, claimWatchlistForNotification } from "@/lib/medicines-dal";
 import { sendPriceDropEmail } from "@/lib/email";
 import { formatGBP } from "@/lib/format-utils";
 
@@ -14,6 +14,9 @@ export async function GET(req: Request) {
 
   for (const entry of entries) {
     if (!entry.new_price_gbp) continue;
+    // Claim the row before sending — prevents duplicate emails on Vercel retry
+    const claimed = await claimWatchlistForNotification(entry.id, entry.new_price_gbp);
+    if (!claimed) continue;
     try {
       await sendPriceDropEmail(
         entry.email,
@@ -23,7 +26,6 @@ export async function GET(req: Request) {
         entry.medicine_id,
         entry.token,
       );
-      await updateWatchlistPrice(entry.id, entry.new_price_gbp);
       notified++;
     } catch (err) {
       console.error(`[cron] failed for watchlist id=${entry.id}`, err);

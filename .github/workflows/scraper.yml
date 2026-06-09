@@ -49,6 +49,13 @@ jobs:
           echo "Running: $CMD"
           eval $CMD
 
+      - name: Sync PostgreSQL prices to production D1
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: node scripts/scrapers/sync-pg-to-d1.mjs --remote
+
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@v4

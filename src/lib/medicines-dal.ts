@@ -627,3 +627,20 @@ export async function updateWatchlistPrice(id: number, priceGbp: string | number
     'UPDATE watchlist SET current_price_gbp = ?1 WHERE id = ?2',
   ).bind(parseFloat(String(priceGbp)), id).run();
 }
+
+// Atomically claims a watchlist entry for notification by updating current_price_gbp
+// only if it still matches the price we read — returns false if another invocation
+// already claimed it (current_price_gbp changed), preventing duplicate emails.
+export async function claimWatchlistForNotification(
+  id: number,
+  newPriceGbp: string | number,
+): Promise<boolean> {
+  const db = await getDB();
+  const newPrice = parseFloat(String(newPriceGbp));
+  const result = await db.prepare(
+    `UPDATE watchlist SET current_price_gbp = ?1
+     WHERE id = ?2
+       AND (current_price_gbp IS NULL OR current_price_gbp > ?1)`,
+  ).bind(newPrice, id).run();
+  return result.meta.changes > 0;
+}

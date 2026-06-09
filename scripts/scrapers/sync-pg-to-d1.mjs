@@ -33,8 +33,10 @@ function escapeSql(val) {
   return "'" + String(val).replace(/'/g, "''") + "'";
 }
 
+const REMOTE = process.argv.includes('--remote');
+
 async function main() {
-  console.log('Connecting to PostgreSQL...');
+  console.log(`Connecting to PostgreSQL... (D1 target: ${REMOTE ? 'production' : 'local'})`);
   
   // Get counts
   const counts = await pool.query(`
@@ -115,8 +117,9 @@ async function main() {
   if (meds.length > 0) {
     console.log('  Importing new medicines...');
     try {
-      execSync('npx wrangler d1 execute generiq --local --file=sql/d1-sync-medicines.sql', { 
-        cwd: rootDir, stdio: 'pipe', timeout: 60000 
+      const medicinesFlag = REMOTE ? '--remote' : '--local';
+      execSync(`npx wrangler d1 execute generiq ${medicinesFlag} --file=sql/d1-sync-medicines.sql`, {
+        cwd: rootDir, stdio: 'pipe', timeout: 60000
       });
       console.log(`  ✓ ${meds.length} medicines imported`);
     } catch (e) {
@@ -127,8 +130,9 @@ async function main() {
   if (prices.length > 0) {
     console.log('  Importing scraper prices...');
     try {
-      execSync('npx wrangler d1 execute generiq --local --file=sql/d1-sync-prices.sql', { 
-        cwd: rootDir, stdio: 'pipe', timeout: 60000 
+      const pricesFlag = REMOTE ? '--remote' : '--local';
+      execSync(`npx wrangler d1 execute generiq ${pricesFlag} --file=sql/d1-sync-prices.sql`, {
+        cwd: rootDir, stdio: 'pipe', timeout: 60000
       });
       console.log(`  ✓ ${prices.length} prices imported`);
     } catch (e) {
@@ -139,8 +143,9 @@ async function main() {
   // Verify D1 counts
   console.log('\n── Local D1 verification ──');
   try {
+    const verifyFlag = REMOTE ? '--remote' : '--local';
     const result = execSync(
-      'npx wrangler d1 execute generiq --local --command="SELECT \'medicines\' as tbl, COUNT(*) as cnt FROM medicines UNION ALL SELECT \'prices\', COUNT(*) FROM pharmacy_prices UNION ALL SELECT \'ingredients\', COUNT(*) FROM ingredients"',
+      `npx wrangler d1 execute generiq ${verifyFlag} --command="SELECT 'medicines' as tbl, COUNT(*) as cnt FROM medicines UNION ALL SELECT 'prices', COUNT(*) FROM pharmacy_prices UNION ALL SELECT 'ingredients', COUNT(*) FROM ingredients"`,
       { cwd: rootDir, encoding: 'utf8', timeout: 30000 }
     );
     const match = result.match(/"results":\s*\[([\s\S]*?)\]/);
