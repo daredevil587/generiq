@@ -12,7 +12,7 @@ export default function SavingsSummary({ prices, category }: Props) {
     .filter(p => p.source !== "nhs_drug_tariff")
     .sort((a, b) => parseFloat(a.price_gbp) - parseFloat(b.price_gbp));
   const cheapest = retailPrices[0] ?? null;
-  const isMedicine = category === "medicine";
+  const isMedicine = !["supplement", "skincare", "baby", "pet", "haircare", "dental", "sports"].includes(category);
 
   if (!cheapest) {
     return (

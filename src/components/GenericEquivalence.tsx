@@ -6,7 +6,8 @@ interface Props {
 }
 
 export default function GenericEquivalence({ medicine, ingredients }: Props) {
-  if (medicine.category !== "medicine") return null;
+  const NON_MEDICINE = ["supplement", "skincare", "baby", "pet", "haircare", "dental", "sports"];
+  if (NON_MEDICINE.includes(medicine.category ?? "")) return null;
 
   const activeIngredients = ingredients.filter(i => i.is_active);
   const ingredientText = activeIngredients.length

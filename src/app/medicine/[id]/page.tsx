@@ -151,6 +151,7 @@ export default async function MedicinePage({ params }: Props) {
   // ── Feature D: annual savings calculator ─────────────────────────────────
   const otcSavingPerItem = retailCheapestVal !== null ? NHS_RX_CHARGE - retailCheapestVal : null;
   const buyOtcIsCheaper  = retailCheapestVal !== null && retailCheapestVal < NHS_RX_CHARGE;
+  const isMedicineCategory = !["supplement", "skincare", "baby", "pet", "haircare", "dental", "sports"].includes(medicine.category ?? "");
 
   return (
     <>
@@ -289,7 +290,7 @@ export default async function MedicinePage({ params }: Props) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-green-800 dark:text-green-300">
-              Same ingredient available for {formatGBP(String(parseFloat(cheaperAlternative.min_price!) ))} less
+              Same ingredient available for {formatGBP(String(retailCheapestVal! - parseFloat(cheaperAlternative.min_price!)))} less
             </p>
             <p className="text-xs text-green-700 dark:text-green-400 mt-0.5 truncate">
               {cheaperAlternative.name} — same active ingredient, lower price
@@ -320,7 +321,7 @@ export default async function MedicinePage({ params }: Props) {
       <PriceHistorySnapshot prices={prices} />
 
       {/* Feature 3 — How to Save More Tips */}
-      {medicine.category === 'medicine' && (
+      {isMedicineCategory && (
         <div className="mt-5">
           {buyOtcIsCheaper && (
             <div className="flex gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4 mb-3">
@@ -374,7 +375,7 @@ export default async function MedicinePage({ params }: Props) {
       )}
 
       {/* D — Annual savings calculator (medicines only — not supplements/skincare) */}
-      {retailCheapestVal !== null && medicine.category === 'medicine' && (
+      {retailCheapestVal !== null && isMedicineCategory && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-5 sm:p-6 mt-5">
           <h2 className="font-bold text-[var(--color-foreground)] text-base mb-4 flex items-center gap-2">
             <svg className="w-5 h-5 text-[var(--color-brand)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

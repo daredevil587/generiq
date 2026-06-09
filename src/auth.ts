@@ -69,14 +69,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
             .prepare(
               "SELECT * FROM verification_tokens WHERE identifier = ? AND token = ? AND expires > datetime('now')"
             )
-            .bind(phone, otp)
+            .bind(`phone:${phone}`, otp)
             .first<{ identifier: string; token: string; expires: string }>();
 
           if (!verification) return null;
 
           await d1
             .prepare("DELETE FROM verification_tokens WHERE identifier = ? AND token = ?")
-            .bind(phone, otp)
+            .bind(`phone:${phone}`, otp)
             .run();
 
           let user = await d1

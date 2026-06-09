@@ -8,8 +8,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate 6-digit OTP (getRandomValues works in both Node and Cloudflare Workers)
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    const otp = (100000 + (arr[0] % 900000)).toString();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
 
     // Try to use Cloudflare D1 + Twilio (production)
@@ -25,13 +27,23 @@ export async function POST(req: Request) {
 
     if (cloudflareCtx?.env?.DB) {
       const db = cloudflareCtx.env.DB as unknown as D1Database;
+
+      // Rate limit: reject if a non-expired OTP already exists for this phone
+      const existing = await db
+        .prepare("SELECT expires FROM verification_tokens WHERE identifier = ?1 LIMIT 1")
+        .bind(`phone:${phone}`)
+        .first<{ expires: string }>();
+      if (existing && new Date(existing.expires) > new Date()) {
+        return NextResponse.json({ error: "Please wait before requesting a new code" }, { status: 429 });
+      }
+
       const expiresStr = expires.toISOString().replace("T", " ").split(".")[0];
 
       await (db as D1Database)
         .prepare(
-          "INSERT OR REPLACE INTO verification_tokens (identifier, token, expires) VALUES (?, ?, ?)"
+          "INSERT OR REPLACE INTO verification_tokens (identifier, token, expires) VALUES (?1, ?2, ?3)"
         )
-        .bind(phone, otp, expiresStr)
+        .bind(`phone:${phone}`, otp, expiresStr)
         .run();
 
       const accountSid = cloudflareCtx.env.TWILIO_ACCOUNT_SID;
@@ -63,7 +75,8 @@ export async function POST(req: Request) {
 
       if (!twilioRes.ok) {
         const errorData = await twilioRes.json() as Record<string, unknown>;
-        throw new Error(`Twilio error: ${JSON.stringify(errorData)}`);
+        console.error("[OTP] Twilio error:", errorData);
+        throw new Error("SMS delivery failed");
       }
 
       return NextResponse.json({ success: true });
