@@ -224,6 +224,10 @@ sql/
 # Required — Railway PostgreSQL
 DATABASE_URL=postgresql://...
 
+# Optional - EMA spreadsheet used by the database/import scripts
+# Defaults to data/ema-medicines.xlsx when omitted
+EMA_EXCEL=C:/path/to/ema-medicines.xlsx
+
 # Required — NextAuth
 AUTH_SECRET=any-random-32-char-string
 
@@ -260,3 +264,7 @@ TWILIO_PHONE_NUMBER="placeholder"
 npm install
 npm run dev     # starts on localhost:3000
 ```
+
+To run the medicine import scripts, place the EMA spreadsheet at `data/ema-medicines.xlsx`
+or set `EMA_EXCEL` to its location before running `node scripts/setup-db.mjs` or
+`node scripts/import-medicines.mjs`.

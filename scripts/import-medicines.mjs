@@ -6,15 +6,26 @@
  */
 
 import { createRequire } from 'module';
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
 
-const EMA_EXCEL_PATH = process.env.EMA_EXCEL ||
-  'C:\\Users\\yadav\\.claude\\projects\\F--geniric-iq\\0c290095-c67a-442d-8af2-0e5fa561bcca\\tool-results\\webfetch-1778449897201-bj4iaz.xlsx';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = join(__dirname, '..');
+const EMA_EXCEL_PATH = process.env.EMA_EXCEL || join(PROJECT_ROOT, 'data', 'ema-medicines.xlsx');
+const OUTPUT_PATH = join(PROJECT_ROOT, 'src', 'lib', 'medicines-imported.ts');
 
-const OUTPUT_PATH = 'src/lib/medicines-imported.ts';
+function assertEmaSource() {
+  if (existsSync(EMA_EXCEL_PATH)) return;
+
+  throw new Error(
+    `EMA spreadsheet not found at "${EMA_EXCEL_PATH}". ` +
+    'Set EMA_EXCEL to the source .xlsx path or place the file at data/ema-medicines.xlsx.',
+  );
+}
 
 // ─── EMA column indices (0-based, row 8 is header) ──────────────────────────
 const COL = {
@@ -339,6 +350,7 @@ function generateTS(map) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('=== GeneriQ Medicine Import ===\n');
+  assertEmaSource();
 
   const emaMap = parseEMA();
   const fdaMap = await fetchFDA();
@@ -352,4 +364,7 @@ async function main() {
   console.log(`\nWrote ${count} medicines to ${OUTPUT_PATH}`);
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

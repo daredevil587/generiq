@@ -51,5 +51,6 @@ next-env.d.ts
 
 # large data files
 *.zip
+data/*.xlsx
 scripts/scrapers/feeds/
 nhs_dmd_extract/

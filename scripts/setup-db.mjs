@@ -7,7 +7,7 @@
  */
 
 import { createRequire } from 'module';
-import { readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';
@@ -17,12 +17,19 @@ const { Pool } = require('pg');
 const XLSX = require('xlsx');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '..', '.env.local') });
+const PROJECT_ROOT = join(__dirname, '..');
+dotenv.config({ path: join(PROJECT_ROOT, '.env.local') });
 
-const EMA_EXCEL = join(
-  'C:\\Users\\yadav\\.claude\\projects\\F--geniric-iq\\0c290095-c67a-442d-8af2-0e5fa561bcca\\tool-results',
-  'webfetch-1778449897201-bj4iaz.xlsx',
-);
+const EMA_EXCEL = process.env.EMA_EXCEL || join(PROJECT_ROOT, 'data', 'ema-medicines.xlsx');
+
+function assertEmaSource() {
+  if (existsSync(EMA_EXCEL)) return;
+
+  throw new Error(
+    `EMA spreadsheet not found at "${EMA_EXCEL}". ` +
+    'Set EMA_EXCEL to the source .xlsx path or place the file at data/ema-medicines.xlsx.',
+  );
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -527,6 +534,7 @@ async function batchInsertEMA(client, emaMeds, seedNames) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  assertEmaSource();
   const client = await pool.connect();
   try {
     console.log('=== GeneriQ DB Setup ===\n');
